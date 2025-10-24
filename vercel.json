@@ -2,14 +2,18 @@
   "buildCommand": "composer install --no-dev --optimize-autoloader && npm install && npm run build",
   "outputDirectory": "public",
   "functions": {
-    "api/index.php": {
+    "public/index.php": {
       "runtime": "vercel-php@0.6.0"
     }
   },
   "routes": [
     {
+      "src": "/storage/(.*)",
+      "dest": "/storage/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/api/index.php"
+      "dest": "/public/index.php"
     }
   ]
 }
