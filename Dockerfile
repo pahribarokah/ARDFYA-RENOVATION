@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.2-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -11,18 +11,19 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     zip \
     unzip \
-    nginx \
-    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /app
+WORKDIR /var/www/html
 
 # Copy application files
 COPY . .
@@ -34,17 +35,14 @@ RUN composer install --no-dev --optimize-autoloader
 RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views
 
 # Set permissions
-RUN chown -R www-data:www-data /app
+RUN chown -R www-data:www-data /var/www/html
 
-# Copy nginx config
-COPY nginx.conf /etc/nginx/sites-available/default
-
-# Copy supervisor config
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Copy Apache config
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
 
 # Expose port
-EXPOSE 8000
+EXPOSE 80
 
-# Start services
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Start Apache
+CMD ["apache2-foreground"]
 
