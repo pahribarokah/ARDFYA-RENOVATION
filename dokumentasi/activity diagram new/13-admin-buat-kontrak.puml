@@ -1,0 +1,109 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+
+title **Activity Diagram - UC20: Generate Kontrak**
+
+|Admin|
+start
+:Akses menu generate kontrak;
+
+|Sistem|
+:Load halaman contract management;
+:Query project yang belum ada contractnya;
+:Tampilkan daftar project eligible;
+
+|Admin|
+:Pilih project untuk generate contract;
+
+|Sistem|
+:Load data project dan customer;
+:Pre-fill form contract dengan data project;
+:Generate contract number otomatis;
+
+|Admin|
+:Review data project;
+:Input nilai contract (amount);
+:Set contract start_date dan end_date;
+:Input syarat dan ketentuan;
+:Add contract notes;
+
+if (Ingin preview dulu?) then (Ya)
+  :Klik "Preview Contract";
+
+  |Sistem|
+  :Generate preview PDF menggunakan DomPDF;
+  :Tampilkan preview contract;
+
+  |Admin|
+  :Review preview contract;
+
+  if (Contract sudah benar?) then (Ya)
+    :Klik "Generate Final Contract";
+  else (Tidak)
+    :Edit contract details;
+
+    |Sistem|
+    :Kembali ke form edit;
+    stop
+  endif
+else (Tidak)
+  :Langsung submit contract;
+endif
+
+|Sistem|
+:Validasi data contract;
+:Simpan contract ke database;
+:Generate final PDF contract;
+:Link contract dengan project (One-to-One);
+:Update project contract status;
+:Kirim notifikasi ke customer;
+:Customer dapat akses UC14 (Download Kontrak PDF);
+
+|Admin|
+:Contract berhasil di-generate;
+:Customer mendapat akses download;
+
+|Sistem|
+stop
+
+@enduml

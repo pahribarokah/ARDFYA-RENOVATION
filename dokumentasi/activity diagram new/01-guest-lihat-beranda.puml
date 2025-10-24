@@ -1,0 +1,90 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC01: Lihat Portfolio**
+
+|Guest|
+start
+:Akses website ARDFYA;
+:Navigasi ke menu Portfolio;
+
+|Sistem|
+:Load halaman portfolio;
+:Query data portfolio dari database;
+:Tampilkan grid portfolio dengan gambar;
+
+|Guest|
+:Browse portfolio projects;
+:Lihat gambar dan deskripsi;
+
+if (Ingin lihat detail project?) then (Ya)
+  :Klik portfolio item;
+
+  |Sistem|
+  :Load detail portfolio;
+  :Tampilkan gambar lengkap;
+  :Tampilkan deskripsi detail;
+  :Tampilkan kategori project;
+
+  |Guest|
+  :Review detail portfolio;
+  :Lihat galeri foto project;
+
+  if (Tertarik dengan layanan?) then (Ya)
+    :Klik "Ajukan Inquiry";
+
+    |Sistem|
+    :Redirect ke form inquiry;
+    stop
+  else (Tidak)
+    :Kembali ke daftar portfolio;
+    stop
+  endif
+else (Tidak)
+  :Selesai browse portfolio;
+  stop
+endif
+
+@enduml

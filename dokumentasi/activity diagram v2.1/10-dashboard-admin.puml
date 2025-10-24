@@ -1,0 +1,140 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC10: Dashboard Admin**
+
+|Admin|
+start
+:Login ke sistem admin;
+:Akses dashboard admin;
+
+|Sistem|
+:Validasi session admin;
+:Load statistik sistem;
+:Query inquiry terbaru;
+:Query project aktif;
+:Query customer terbaru;
+:Calculate KPI metrics;
+:Render dashboard dengan data;
+
+|Admin|
+:Lihat overview dashboard;
+:Review statistik bisnis;
+:Cek notifikasi penting;
+
+if (Aksi yang dipilih?) then (Kelola Inquiry)
+  :Klik menu "Manage Inquiries";
+  
+  |Sistem|
+  :Redirect ke UC02 (Proses Inquiry);
+  
+  |Admin|
+  :Akses halaman kelola inquiry;
+else if (Kelola Project)
+  :Klik menu "Manage Projects";
+  
+  |Sistem|
+  :Redirect ke UC14 (Kelola Project);
+  
+  |Admin|
+  :Akses halaman kelola project;
+else if (Kelola Customer)
+  :Klik menu "Manage Customers";
+  
+  |Sistem|
+  :Redirect ke UC03 (Kelola Data Customer);
+  
+  |Admin|
+  :Akses halaman kelola customer;
+else if (Kelola Portfolio)
+  :Klik menu "Manage Portfolio";
+  
+  |Sistem|
+  :Redirect ke UC04 (Kelola Portfolio);
+  
+  |Admin|
+  :Akses halaman kelola portfolio;
+else if (Chat Customer)
+  :Klik menu "Customer Chat";
+  
+  |Sistem|
+  :Redirect ke UC05 (Chat dengan Customer);
+  
+  |Admin|
+  :Akses halaman chat customer;
+else if (Generate Report)
+  :Klik "Generate Reports";
+  
+  |Sistem|
+  :Load halaman reporting;
+  :Query data untuk laporan;
+  :Generate charts dan statistics;
+  
+  |Admin|
+  :Review laporan bisnis;
+  :Export laporan (opsional);
+else (View Notifications)
+  :Klik icon notifikasi;
+  
+  |Sistem|
+  :Load notifikasi admin;
+  :Mark notifikasi sebagai read;
+  
+  |Admin|
+  :Baca notifikasi sistem;
+  :Take action jika diperlukan;
+endif
+
+' MERGE POINT - All paths converge here
+|Admin|
+:Selesai menggunakan dashboard;
+
+|Sistem|
+:Update last activity timestamp;
+:Save admin session;
+' SINGLE END POINT
+stop
+
+@enduml

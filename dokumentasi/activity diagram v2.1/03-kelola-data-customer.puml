@@ -1,0 +1,139 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC03: Kelola Data Customer**
+
+|Admin|
+start
+:Login ke sistem admin;
+:Akses menu "Kelola Customer";
+
+|Sistem|
+:Load halaman customer management;
+:Query semua data customer;
+:Tampilkan daftar customer dengan pagination;
+
+|Admin|
+:Lihat daftar customer;
+:Pilih aksi yang diinginkan;
+
+if (Aksi yang dipilih?) then (View Detail)
+  :Klik customer untuk lihat detail;
+  
+  |Sistem|
+  :Load detail customer lengkap;
+  :Tampilkan profil customer;
+  :Tampilkan riwayat inquiry;
+  :Tampilkan riwayat project;
+  
+  |Admin|
+  :Review informasi customer;
+  :Lihat aktivitas customer;
+else if (Edit Customer)
+  :Pilih customer untuk edit;
+  
+  |Sistem|
+  :Load form edit customer;
+  :Pre-fill dengan data existing;
+  
+  |Admin|
+  :Update data customer;
+  :Modify nama, email, telepon;
+  :Update status customer;
+  :Submit perubahan;
+  
+  |Sistem|
+  :Validasi data yang diupdate;
+  :Update customer di database;
+  :Log perubahan data;
+  :Kirim notifikasi ke customer (jika perlu);
+  
+  |Admin|
+  :Konfirmasi data berhasil diupdate;
+else if (Delete Customer)
+  :Pilih customer untuk hapus;
+  :Konfirmasi penghapusan;
+  
+  |Sistem|
+  :Cek dependency (inquiry, project);
+  
+  if (Ada dependency?) then (Ya)
+    :Tampilkan warning;
+    :Suggest soft delete atau archive;
+    
+    |Admin|
+    :Pilih archive customer;
+    
+    |Sistem|
+    :Set status = 'archived';
+    :Preserve data untuk referensi;
+  else (Tidak)
+    :Hard delete customer;
+    :Remove dari database;
+  endif
+  
+  |Admin|
+  :Konfirmasi customer dihapus/diarchive;
+else (Search/Filter)
+  :Input kriteria pencarian;
+  :Set filter berdasarkan status/tanggal;
+  
+  |Sistem|
+  :Apply filter ke query;
+  :Tampilkan hasil pencarian;
+  
+  |Admin|
+  :Review hasil filter;
+endif
+
+' MERGE POINT - All paths converge here
+|Admin|
+:Selesai kelola data customer;
+
+|Sistem|
+' SINGLE END POINT
+stop
+
+@enduml

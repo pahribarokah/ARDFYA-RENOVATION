@@ -1,0 +1,132 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC07: Dashboard Customer**
+
+|Customer|
+start
+:Login ke sistem customer;
+:Akses dashboard customer;
+
+|Sistem|
+:Validasi session customer;
+:Load data customer dari database;
+:Query inquiry customer;
+:Query project customer;
+:Query notifikasi terbaru;
+:Render dashboard dengan data;
+
+|Customer|
+:Lihat overview dashboard;
+:Review informasi personal;
+
+if (Aksi yang dipilih?) then (Lihat Inquiry)
+  :Klik menu "My Inquiries";
+  
+  |Sistem|
+  :Load daftar inquiry customer;
+  :Tampilkan status setiap inquiry;
+  
+  |Customer|
+  :Review status inquiry;
+  :Lihat response admin;
+else if (Lihat Project)
+  :Klik menu "My Projects";
+  
+  |Sistem|
+  :Load daftar project customer;
+  :Tampilkan progress project;
+  :Tampilkan timeline project;
+  
+  |Customer|
+  :Monitor progress project;
+  :Lihat update terbaru;
+else if (Lihat Notifikasi)
+  :Klik icon notifikasi;
+  
+  |Sistem|
+  :Load notifikasi customer;
+  :Mark notifikasi sebagai read;
+  
+  |Customer|
+  :Baca notifikasi terbaru;
+  :Lihat update dari admin;
+else if (Update Profil)
+  :Klik "Edit Profile";
+  
+  |Sistem|
+  :Redirect ke UC08 (Kelola Profil);
+  
+  |Customer|
+  :Akses halaman edit profil;
+else if (Chat Admin)
+  :Klik "Chat with Admin";
+  
+  |Sistem|
+  :Redirect ke UC06 (Chat dengan Admin);
+  
+  |Customer|
+  :Mulai chat dengan admin;
+else (Ajukan Inquiry Baru)
+  :Klik "New Inquiry";
+  
+  |Sistem|
+  :Redirect ke UC09 (Ajukan Inquiry);
+  
+  |Customer|
+  :Isi form inquiry baru;
+endif
+
+' MERGE POINT - All paths converge here
+|Customer|
+:Selesai menggunakan dashboard;
+
+|Sistem|
+:Update last activity timestamp;
+:Save session data;
+' SINGLE END POINT
+stop
+
+@enduml

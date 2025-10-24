@@ -1,0 +1,231 @@
+@startuml Class Diagram - ARDFYA v2.1
+
+!theme plain
+title Class Diagram - ARDFYA v2.1 Construction Management System
+
+' User Class (Main entity)
+class User {
+  -id: int
+  -name: string
+  -email: string
+  -email_verified_at: timestamp
+  -password: string
+  -phone: string
+  -address: text
+  -role: enum(customer, admin)
+  -is_active: boolean
+  -remember_token: string
+  -created_at: timestamp
+  -updated_at: timestamp
+  
+  +isAdmin(): boolean
+  +isCustomer(): boolean
+  +inquiries(): HasMany
+  +projects(): HasMany
+  +messages(): HasMany
+  +contracts(): HasMany
+  +getFullNameAttribute(): string
+  +scopeCustomers(): Builder
+  +scopeAdmins(): Builder
+}
+
+' Service Class
+class Service {
+  -id: int
+  -name: string
+  -description: text
+  -icon: string
+  -image_path: string
+  -price_range: string
+  -category: string
+  -is_active: boolean
+  -is_featured: boolean
+  -ordering: int
+  -created_at: timestamp
+  -updated_at: timestamp
+  
+  +inquiries(): HasMany
+  +projects(): HasMany
+  +scopeActive(): Builder
+  +scopeFeatured(): Builder
+  +getFormattedPriceAttribute(): string
+}
+
+' Inquiry Class
+class Inquiry {
+  -id: int
+  -user_id: int
+  -service_id: int
+  -title: string
+  -description: text
+  -budget_range: string
+  -location: string
+  -timeline: string
+  -status: enum(pending, reviewed, approved, rejected, converted)
+  -admin_notes: text
+  -priority: enum(low, medium, high, urgent)
+  -created_at: timestamp
+  -updated_at: timestamp
+  
+  +user(): BelongsTo
+  +service(): BelongsTo
+  +project(): HasOne
+  +scopeByStatus(): Builder
+  +scopeByPriority(): Builder
+  +getStatusColorAttribute(): string
+  +getPriorityColorAttribute(): string
+}
+
+' Project Class
+class Project {
+  -id: int
+  -user_id: int
+  -service_id: int
+  -inquiry_id: int
+  -title: string
+  -description: text
+  -budget: decimal
+  -start_date: date
+  -expected_end_date: date
+  -actual_end_date: date
+  -status: enum(planning, in_progress, on_hold, completed, cancelled)
+  -progress_percentage: int
+  -location: string
+  -team_assigned: json
+  -notes: text
+  -created_at: timestamp
+  -updated_at: timestamp
+  
+  +user(): BelongsTo
+  +service(): BelongsTo
+  +inquiry(): BelongsTo
+  +contract(): HasOne
+  +getFormattedBudgetAttribute(): string
+  +getStatusColorAttribute(): string
+  +getProgressBarColorAttribute(): string
+  +scopeByStatus(): Builder
+  +scopeActive(): Builder
+}
+
+' Contract Class
+class Contract {
+  -id: int
+  -project_id: int
+  -contract_number: string
+  -title: string
+  -description: text
+  -total_amount: decimal
+  -payment_terms: text
+  -start_date: date
+  -end_date: date
+  -status: enum(draft, sent, signed, active, completed, cancelled)
+  -payment_status: enum(pending, partial, paid, overdue)
+  -terms_and_conditions: text
+  -signed_at: timestamp
+  -created_at: timestamp
+  -updated_at: timestamp
+  
+  +project(): BelongsTo
+  +user(): BelongsTo
+  +payments(): HasMany
+  +generatePDF(): string
+  +getFormattedAmountAttribute(): string
+  +getStatusColorAttribute(): string
+  +scopeActive(): Builder
+}
+
+' Portfolio Class (NEW v2.1)
+class Portfolio {
+  -id: int
+  -title: string
+  -description: text
+  -category: string
+  -image_path: string
+  -client_name: string
+  -location: string
+  -completion_date: date
+  -project_value: decimal
+  -is_featured: boolean
+  -is_active: boolean
+  -ordering: int
+  -created_at: timestamp
+  -updated_at: timestamp
+  
+  +scopeActive(): Builder
+  +scopeFeatured(): Builder
+  +scopeByCategory(): Builder
+  +scopeOrdered(): Builder
+  +getFormattedValueAttribute(): string
+  +getImageUrlAttribute(): string
+  +getCategoryColorAttribute(): string
+}
+
+' Message Class
+class Message {
+  -id: int
+  -sender_id: int
+  -receiver_id: int
+  -message: text
+  -is_read: boolean
+  -message_type: enum(text, image, file)
+  -attachment_path: string
+  -created_at: timestamp
+  -updated_at: timestamp
+  
+  +sender(): BelongsTo
+  +receiver(): BelongsTo
+  +scopeUnread(): Builder
+  +scopeBetweenUsers(): Builder
+  +markAsRead(): void
+  +getFormattedTimeAttribute(): string
+}
+
+' Payment Class
+class Payment {
+  -id: int
+  -contract_id: int
+  -amount: decimal
+  -payment_date: date
+  -payment_method: string
+  -reference_number: string
+  -status: enum(pending, completed, failed, refunded)
+  -notes: text
+  -created_at: timestamp
+  -updated_at: timestamp
+  
+  +contract(): BelongsTo
+  +getFormattedAmountAttribute(): string
+  +getStatusColorAttribute(): string
+  +scopeCompleted(): Builder
+}
+
+' Relationships
+User ||--o{ Inquiry : "has many"
+User ||--o{ Project : "has many"
+User ||--o{ Message : "sends/receives"
+User ||--o{ Contract : "has many"
+
+Service ||--o{ Inquiry : "has many"
+Service ||--o{ Project : "has many"
+
+Inquiry ||--|| User : "belongs to"
+Inquiry ||--|| Service : "belongs to"
+Inquiry ||--o| Project : "converts to"
+
+Project ||--|| User : "belongs to"
+Project ||--|| Service : "belongs to"
+Project ||--|| Inquiry : "created from"
+Project ||--o| Contract : "has one"
+
+Contract ||--|| Project : "belongs to"
+Contract ||--o{ Payment : "has many"
+
+Message ||--|| User : "sender"
+Message ||--|| User : "receiver"
+
+Payment ||--|| Contract : "belongs to"
+
+' Portfolio is standalone (no direct relationships)
+note right of Portfolio : "Standalone entity\nfor showcase purposes\n(NEW in v2.1)"
+
+@enduml

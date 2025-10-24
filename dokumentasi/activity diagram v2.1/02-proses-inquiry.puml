@@ -1,0 +1,122 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC02: Proses Inquiry**
+
+|Admin|
+start
+:Login ke sistem admin;
+:Akses menu "Kelola Inquiry";
+
+|Sistem|
+:Load daftar inquiry;
+:Query inquiry dengan status 'new', 'pending';
+:Tampilkan daftar inquiry dengan filter;
+
+|Admin|
+:Lihat daftar inquiry customer;
+:Pilih inquiry yang akan diproses;
+
+|Sistem|
+:Load detail inquiry lengkap;
+:Tampilkan data customer;
+:Tampilkan detail kebutuhan project;
+:Tampilkan file attachment (jika ada);
+
+|Admin|
+:Review detail inquiry;
+:Analisis kebutuhan customer;
+:Evaluasi kelayakan project;
+
+if (Keputusan admin?) then (Approve)
+  :Update status = 'approved';
+  :Input estimasi budget;
+  :Input estimasi timeline;
+  :Add admin notes;
+  
+  |Sistem|
+  :Update inquiry status;
+  :Create project baru (include UC14);
+  :Link project dengan inquiry;
+  :Generate project ID;
+  :Kirim notifikasi approval ke customer;
+  
+  |Admin|
+  :Konfirmasi project berhasil dibuat;
+else if (Need More Info)
+  :Update status = 'pending';
+  :Input pertanyaan untuk customer;
+  :Request additional information;
+  
+  |Sistem|
+  :Update inquiry dengan notes;
+  :Kirim notifikasi ke customer;
+  :Set reminder untuk follow-up;
+  
+  |Admin|
+  :Tunggu response customer;
+else (Reject)
+  :Update status = 'rejected';
+  :Input alasan penolakan;
+  :Add rejection notes;
+  
+  |Sistem|
+  :Update inquiry status;
+  :Kirim notifikasi penolakan;
+  :Archive inquiry;
+  
+  |Admin|
+  :Konfirmasi inquiry ditolak;
+endif
+
+' MERGE POINT - All paths converge here
+|Admin|
+:Selesai proses inquiry;
+
+|Sistem|
+' SINGLE END POINT
+stop
+
+@enduml

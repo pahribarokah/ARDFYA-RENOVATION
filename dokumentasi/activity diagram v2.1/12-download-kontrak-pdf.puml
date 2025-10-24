@@ -1,0 +1,129 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC12: Download Kontrak PDF**
+
+|Customer|
+start
+:Login ke sistem customer;
+:Akses project dengan kontrak;
+:Klik "View Contract" atau "Download Contract";
+
+|Sistem|
+:Validasi akses customer ke kontrak;
+:Cek apakah kontrak sudah di-generate;
+
+if (Kontrak tersedia?) then (Ya)
+  :Load data kontrak dari database;
+  :Cek status kontrak (draft/final);
+  
+  if (Aksi yang dipilih customer?) then (Preview)
+    :Generate PDF preview;
+    :Tampilkan kontrak di browser;
+    
+    |Customer|
+    :Lihat preview kontrak;
+    :Review isi kontrak;
+    :Baca syarat dan ketentuan;
+    
+    if (Ingin download?) then (Ya)
+      :Klik "Download PDF";
+      
+      |Sistem|
+      :Generate final PDF;
+      :Set proper headers untuk download;
+      :Stream PDF file ke browser;
+      
+      |Customer|
+      :Download file PDF ke device;
+      :Simpan kontrak untuk referensi;
+    else (Tidak)
+      :Selesai preview;
+    endif
+  else (Direct Download)
+    :Generate PDF kontrak;
+    :Set filename dengan format standar;
+    :Set proper MIME type;
+    :Stream PDF untuk download;
+    
+    |Customer|
+    :Download file PDF langsung;
+    :Simpan kontrak ke device;
+  endif
+  
+  |Sistem|
+  :Log download activity;
+  :Update download counter;
+  :Update last_downloaded timestamp;
+else (Tidak)
+  :Tampilkan pesan "Kontrak belum tersedia";
+  :Suggest customer untuk menunggu;
+  
+  |Customer|
+  :Lihat pesan kontrak pending;
+  
+  if (Ingin chat admin?) then (Ya)
+    :Klik "Chat Admin";
+    
+    |Sistem|
+    :Redirect ke UC06 (Chat dengan Admin);
+    
+    |Customer|
+    :Tanya status kontrak ke admin;
+  else (Tidak)
+    :Kembali ke project dashboard;
+  endif
+endif
+
+' MERGE POINT - All paths converge here
+|Customer|
+:Selesai proses kontrak;
+
+|Sistem|
+:Update customer activity log;
+' SINGLE END POINT
+stop
+
+@enduml

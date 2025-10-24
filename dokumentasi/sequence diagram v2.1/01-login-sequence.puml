@@ -1,0 +1,77 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling sesuai contoh yang diberikan
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam sequence {
+    ArrowColor black
+    ActorBorderColor black
+    LifeLineBorderColor black
+    ParticipantBorderColor #1976D2
+    ParticipantBackgroundColor #E3F2FD
+    BoxBorderColor black
+}
+
+hide footbox
+
+title **Sequence Diagram - UC01: Login**
+
+participant "User" as User
+participant "LoginPage" as LoginPage
+participant "LoginController" as LoginCtrl
+participant "User Model" as UserModel
+
+User -> LoginPage: 1: Login (email, password)
+activate LoginPage
+
+LoginPage -> LoginCtrl: 1.1: authenticate(email, password)
+activate LoginCtrl
+
+LoginCtrl -> UserModel: 1.1.1: validateCredentials(email, password)
+activate UserModel
+
+alt [Valid Credentials]
+    UserModel --> LoginCtrl: 1.1.1.1: userFound()
+    
+    LoginCtrl -> UserModel: 1.1.1.1.1: isAdmin()
+    UserModel --> LoginCtrl: 1.1.1.1.1.1: roleCheck()
+    
+    LoginCtrl -> UserModel: 1.1.1.1.2: isCustomer()
+    UserModel --> LoginCtrl: 1.1.1.1.2.1: roleCheck()
+    
+    LoginCtrl --> LoginPage: 1.1.1.1.3: redirectBasedOnRole()
+    
+    alt [Admin Role]
+        LoginPage --> User: 1.1.1.1.3.1: redirectToAdminDashboard()
+    else [Customer Role]
+        LoginPage --> User: 1.1.1.1.3.2: redirectToCustomerDashboard()
+    else [Guest Role]
+        LoginPage --> User: 1.1.1.1.3.3: redirectToHomepage()
+    end
+    
+else [Invalid Credentials]
+    UserModel --> LoginCtrl: 1.1.1.2: authenticationFailed()
+    LoginCtrl --> LoginPage: 1.2: showErrorMessage()
+    LoginPage --> User: 1.2.1: displayLoginError()
+end
+
+deactivate UserModel
+deactivate LoginCtrl
+deactivate LoginPage
+
+@enduml

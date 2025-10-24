@@ -1,0 +1,88 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC6: Login ke Sistem (Admin)**
+
+|Admin|
+start
+:Akses halaman login;
+:Input email dan password admin;
+:Klik tombol login;
+
+|Sistem|
+:Validasi kredensial admin;
+:Cek role user = 'admin';
+if (Kredensial valid dan role admin?) then (Ya)
+  :Buat session admin;
+  :Apply AdminMiddleware;
+  :Redirect ke UC16 (Dashboard Admin);
+
+  |Admin|
+  :Akses dashboard admin dengan full privileges;
+
+  |Sistem|
+  stop
+else (Tidak)
+  if (Role bukan admin?) then (Ya)
+    :Tampilkan error "Unauthorized access";
+
+    |Admin|
+    :Akses ditolak;
+
+    |Sistem|
+    stop
+  else (Kredensial salah)
+    :Tampilkan error "Invalid credentials";
+
+    |Admin|
+    :Kembali ke halaman login;
+    :Input ulang kredensial;
+
+    |Sistem|
+    stop
+  endif
+endif
+
+@enduml

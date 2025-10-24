@@ -1,0 +1,648 @@
+@startuml Sequence Diagrams - ARDFYA v2.1
+
+!theme plain
+
+' ========================================
+' 1. Customer Registration Sequence
+' ========================================
+title Sequence Diagram - Customer Registration Process
+
+actor Customer as C
+participant "Registration Page" as RP
+participant "RegisterController" as RC
+participant "User Model" as UM
+participant "Database" as DB
+participant "Email Service" as ES
+participant "Auth System" as AS
+
+C -> RP: Access registration page
+RP -> C: Display registration form
+
+C -> RP: Fill and submit form
+RP -> RC: POST /register with form data
+
+RC -> RC: Validate form data
+alt Validation successful
+    RC -> UM: Check if email exists
+    UM -> DB: SELECT * FROM users WHERE email = ?
+    DB -> UM: Return query result
+    
+    alt Email not exists
+        RC -> RC: Hash password
+        RC -> UM: Create new user
+        UM -> DB: INSERT INTO users
+        DB -> UM: Return user ID
+        
+        RC -> ES: Send welcome email
+        ES -> C: Welcome email sent
+        
+        RC -> AS: Auto login user
+        AS -> RC: Session created
+        
+        RC -> C: Redirect to dashboard with success message
+    else Email already exists
+        RC -> C: Return error "Email already registered"
+    end
+else Validation failed
+    RC -> C: Return validation errors
+end
+
+@enduml
+
+@startuml Sequence Diagram - Customer Login Process
+
+title Sequence Diagram - Customer Login Process
+
+actor Customer as C
+participant "Login Page" as LP
+participant "LoginController" as LC
+participant "Auth System" as AS
+participant "User Model" as UM
+participant "Database" as DB
+participant "Session Store" as SS
+
+C -> LP: Access login page
+LP -> C: Display login form
+
+C -> LP: Enter credentials and submit
+LP -> LC: POST /login with credentials
+
+LC -> AS: Attempt authentication
+AS -> UM: Find user by email
+UM -> DB: SELECT * FROM users WHERE email = ?
+DB -> UM: Return user data
+
+alt User found
+    AS -> AS: Verify password hash
+    alt Password correct
+        AS -> UM: Check if user is active
+        alt User is active
+            AS -> SS: Create session
+            SS -> AS: Session ID returned
+            
+            alt Remember me checked
+                AS -> UM: Generate remember token
+                UM -> DB: UPDATE users SET remember_token = ?
+                AS -> C: Set remember cookie
+            end
+            
+            AS -> LC: Authentication successful
+            LC -> C: Redirect to intended page or dashboard
+        else User inactive
+            AS -> LC: User account disabled
+            LC -> C: Show account disabled message
+        end
+    else Password incorrect
+        AS -> LC: Invalid credentials
+        LC -> C: Show invalid credentials error
+    end
+else User not found
+    AS -> LC: Invalid credentials
+    LC -> C: Show invalid credentials error
+end
+
+@enduml
+
+@startuml Sequence Diagram - Inquiry Submission Process
+
+title Sequence Diagram - Inquiry Submission Process
+
+actor User as U
+participant "Inquiry Form" as IF
+participant "InquiryController" as IC
+participant "Service Model" as SM
+participant "User Model" as UM
+participant "Inquiry Model" as IM
+participant "Database" as DB
+participant "Email Service" as ES
+participant "Admin Notification" as AN
+
+U -> IF: Access inquiry form
+IF -> SM: Load available services
+SM -> DB: SELECT * FROM services WHERE is_active = 1
+DB -> SM: Return active services
+SM -> IF: Services list
+IF -> U: Display form with services
+
+U -> IF: Fill inquiry form and submit
+IF -> IC: POST /inquiries with form data
+
+IC -> IC: Validate form data
+alt Validation successful
+    alt User not logged in
+        IC -> UM: Create guest user or prompt login
+        alt Create guest user
+            UM -> DB: INSERT INTO users (guest data)
+            DB -> UM: Return user ID
+        end
+    end
+    
+    IC -> IM: Create new inquiry
+    IM -> DB: INSERT INTO inquiries
+    DB -> IM: Return inquiry ID
+    
+    IC -> ES: Send confirmation email to user
+    ES -> U: Confirmation email sent
+    
+    IC -> AN: Send notification to admin
+    AN -> AN: Queue admin notification
+    
+    IC -> U: Show success message and tracking info
+else Validation failed
+    IC -> U: Return validation errors
+end
+
+@enduml
+
+@startuml Sequence Diagram - Admin Inquiry Review Process
+
+title Sequence Diagram - Admin Inquiry Review Process
+
+actor Admin as A
+participant "Admin Dashboard" as AD
+participant "InquiryController" as IC
+participant "Inquiry Model" as IM
+participant "Project Model" as PM
+participant "User Model" as UM
+participant "Database" as DB
+participant "Email Service" as ES
+
+A -> AD: Access inquiry management
+AD -> IC: GET /admin/inquiries
+IC -> IM: Get inquiries with filters
+IM -> DB: SELECT * FROM inquiries with joins
+DB -> IM: Return inquiries data
+IM -> IC: Inquiries collection
+IC -> AD: Display inquiries list
+AD -> A: Show inquiries table
+
+A -> AD: Select inquiry to review
+AD -> IC: GET /admin/inquiries/{id}
+IC -> IM: Find inquiry by ID
+IM -> DB: SELECT * FROM inquiries WHERE id = ?
+DB -> IM: Return inquiry data
+IM -> IC: Inquiry details
+IC -> AD: Display inquiry details
+AD -> A: Show inquiry information
+
+A -> AD: Make decision (approve/reject)
+AD -> IC: PUT /admin/inquiries/{id} with decision
+
+alt Approve inquiry
+    IC -> IM: Update inquiry status to 'approved'
+    IM -> DB: UPDATE inquiries SET status = 'approved'
+    
+    alt Create project immediately
+        IC -> PM: Create new project from inquiry
+        PM -> DB: INSERT INTO projects
+        DB -> PM: Return project ID
+        
+        IC -> IM: Update inquiry status to 'converted'
+        IM -> DB: UPDATE inquiries SET status = 'converted'
+    end
+    
+    IC -> ES: Send approval email to customer
+    ES -> ES: Queue approval email
+    
+else Reject inquiry
+    IC -> IM: Update inquiry status to 'rejected'
+    IM -> DB: UPDATE inquiries SET status = 'rejected'
+    
+    IC -> ES: Send rejection email to customer
+    ES -> ES: Queue rejection email
+end
+
+IC -> A: Show success message
+A -> AD: Updated inquiry status displayed
+
+@enduml
+
+@startuml Sequence Diagram - Project Creation Process
+
+title Sequence Diagram - Project Creation Process
+
+actor Admin as A
+participant "Admin Panel" as AP
+participant "ProjectController" as PC
+participant "Project Model" as PM
+participant "User Model" as UM
+participant "Service Model" as SM
+participant "Inquiry Model" as IM
+participant "Database" as DB
+participant "Email Service" as ES
+
+A -> AP: Access project creation
+AP -> PC: GET /admin/projects/create
+PC -> UM: Get customers list
+UM -> DB: SELECT * FROM users WHERE role = 'customer'
+DB -> UM: Return customers
+PC -> SM: Get services list
+SM -> DB: SELECT * FROM services WHERE is_active = 1
+DB -> SM: Return services
+PC -> AP: Display creation form
+AP -> A: Show project form
+
+A -> AP: Fill project details and submit
+AP -> PC: POST /admin/projects with project data
+
+PC -> PC: Validate form data
+alt Validation successful
+    PC -> PM: Create new project
+    PM -> DB: INSERT INTO projects
+    DB -> PM: Return project ID
+
+    alt Project created from inquiry
+        PC -> IM: Update inquiry status to 'converted'
+        IM -> DB: UPDATE inquiries SET status = 'converted'
+    end
+
+    PC -> ES: Send project notification to customer
+    ES -> ES: Queue customer notification
+
+    PC -> A: Redirect with success message
+else Validation failed
+    PC -> A: Return validation errors
+end
+
+@enduml
+
+@startuml Sequence Diagram - Contract Generation Process
+
+title Sequence Diagram - Contract Generation Process
+
+actor Admin as A
+participant "Admin Panel" as AP
+participant "ContractController" as CC
+participant "Contract Model" as CM
+participant "Project Model" as PM
+participant "PDF Generator" as PG
+participant "Database" as DB
+participant "Email Service" as ES
+participant "File Storage" as FS
+
+A -> AP: Access contract creation
+AP -> CC: GET /admin/contracts/create
+CC -> PM: Get projects without contracts
+PM -> DB: SELECT projects WHERE contract_id IS NULL
+DB -> PM: Return available projects
+PM -> CC: Projects list
+CC -> AP: Display contract form
+AP -> A: Show form with projects
+
+A -> AP: Fill contract details and submit
+AP -> CC: POST /admin/contracts with contract data
+
+CC -> CC: Validate form data
+alt Validation successful
+    CC -> CC: Generate contract number
+    CC -> CM: Create new contract
+    CM -> DB: INSERT INTO contracts
+    DB -> CM: Return contract ID
+
+    CC -> PG: Generate PDF contract
+    PG -> PG: Create PDF from template
+    PG -> FS: Store PDF file
+    FS -> PG: Return file path
+
+    CC -> CM: Update contract with PDF path
+    CM -> DB: UPDATE contracts SET pdf_path = ?
+
+    CC -> ES: Send contract to customer
+    ES -> ES: Queue contract email with PDF attachment
+
+    CC -> A: Show success message
+else Validation failed
+    CC -> A: Return validation errors
+end
+
+@enduml
+
+@startuml Sequence Diagram - Portfolio Creation Process (NEW v2.1)
+
+title Sequence Diagram - Portfolio Creation Process (NEW v2.1)
+
+actor Admin as A
+participant "Admin Panel" as AP
+participant "PortfolioController" as PC
+participant "Portfolio Model" as PM
+participant "File Upload" as FU
+participant "Image Processor" as IP
+participant "Database" as DB
+participant "Cache System" as CS
+
+A -> AP: Access portfolio management
+AP -> PC: GET /admin/portfolios
+PC -> PM: Get portfolios list
+PM -> DB: SELECT * FROM portfolios ORDER BY ordering
+DB -> PM: Return portfolios
+PM -> PC: Portfolios collection
+PC -> AP: Display portfolios list
+AP -> A: Show portfolios table
+
+A -> AP: Click create new portfolio
+AP -> PC: GET /admin/portfolios/create
+PC -> AP: Display creation form
+AP -> A: Show portfolio form
+
+A -> AP: Fill portfolio details and submit
+AP -> PC: POST /admin/portfolios with form data
+
+PC -> PC: Validate form data
+alt Validation successful
+    alt Image uploaded
+        PC -> FU: Process uploaded image
+        FU -> FU: Validate image type and size
+        alt Image valid
+            FU -> IP: Resize and optimize image
+            IP -> IP: Create multiple sizes (thumbnail, medium, large)
+            IP -> FU: Return processed images
+            FU -> FU: Store images in storage
+            FU -> PC: Return image paths
+        else Image invalid
+            FU -> PC: Return image validation error
+            PC -> A: Show image error
+        end
+    end
+
+    PC -> PM: Create new portfolio
+    PM -> DB: INSERT INTO portfolios
+    DB -> PM: Return portfolio ID
+
+    alt Portfolio set as featured
+        PC -> CS: Clear homepage cache
+        CS -> CS: Refresh featured portfolios cache
+        PC -> PM: Update homepage display priority
+    end
+
+    PC -> A: Redirect with success message
+else Validation failed
+    PC -> A: Return validation errors
+end
+
+@enduml
+
+@startuml Sequence Diagram - Portfolio Display on Homepage (NEW v2.1)
+
+title Sequence Diagram - Portfolio Display on Homepage (NEW v2.1)
+
+actor Visitor as V
+participant "Homepage" as HP
+participant "HomeController" as HC
+participant "Portfolio Model" as PM
+participant "Database" as DB
+participant "Cache System" as CS
+participant "View Engine" as VE
+
+V -> HP: Access homepage
+HP -> HC: GET / (homepage route)
+
+HC -> CS: Check for cached featured portfolios
+alt Cache hit
+    CS -> HC: Return cached portfolios
+else Cache miss
+    HC -> PM: Get featured portfolios
+    PM -> DB: SELECT * FROM portfolios WHERE is_featured = 1 AND is_active = 1 ORDER BY ordering LIMIT 3
+    DB -> PM: Return featured portfolios
+
+    alt No featured portfolios found
+        PM -> DB: SELECT * FROM portfolios WHERE is_active = 1 ORDER BY ordering, created_at DESC LIMIT 3
+        DB -> PM: Return latest portfolios
+    end
+
+    PM -> HC: Return portfolios collection
+    HC -> CS: Cache portfolios for 1 hour
+end
+
+HC -> VE: Pass portfolios to view
+VE -> VE: Render portfolio cards with data
+note right
+  - Portfolio image or placeholder
+  - Title and description
+  - Category badge
+  - Project value formatting
+  - Location and completion date
+  - Client name
+  - Link to detail page
+end note
+
+VE -> HP: Return rendered homepage
+HP -> V: Display homepage with dynamic portfolios
+
+@enduml
+
+@startuml Sequence Diagram - Real-time Chat Message Process
+
+title Sequence Diagram - Real-time Chat Message Process
+
+actor User as U
+participant "Chat Interface" as CI
+participant "MessageController" as MC
+participant "Message Model" as MM
+participant "Database" as DB
+participant "Pusher Service" as PS
+participant "Notification Service" as NS
+actor Recipient as R
+participant "Recipient Chat" as RC
+
+U -> CI: Type and send message
+CI -> MC: POST /chat/send with message data
+
+MC -> MC: Validate message content
+alt Message valid
+    MC -> MM: Create new message
+    MM -> DB: INSERT INTO messages
+    DB -> MM: Return message ID
+
+    MC -> PS: Broadcast message event
+    PS -> PS: Send to channel for recipient
+
+    alt Recipient online
+        PS -> RC: Real-time message delivery
+        RC -> R: Display new message immediately
+        RC -> R: Play notification sound
+
+        R -> RC: Message viewed (auto-mark as read)
+        RC -> MC: POST /chat/read
+        MC -> MM: Update message as read
+        MM -> DB: UPDATE messages SET is_read = 1
+    else Recipient offline
+        MC -> NS: Queue email notification
+        NS -> NS: Send email notification to recipient
+    end
+
+    MC -> CI: Return success response
+    CI -> U: Update chat interface with sent message
+
+else Message invalid
+    MC -> CI: Return validation error
+    CI -> U: Show error message
+end
+
+@enduml
+
+@startuml Sequence Diagram - Payment Recording Process
+
+title Sequence Diagram - Payment Recording Process
+
+actor Admin as A
+participant "Admin Panel" as AP
+participant "PaymentController" as PC
+participant "Payment Model" as PM
+participant "Contract Model" as CM
+participant "Database" as DB
+participant "Email Service" as ES
+participant "PDF Generator" as PG
+
+A -> AP: Access payment management
+AP -> PC: GET /admin/payments
+PC -> CM: Get contracts with payment status
+CM -> DB: SELECT contracts with payment info
+DB -> CM: Return contracts data
+CM -> PC: Contracts collection
+PC -> AP: Display contracts list
+AP -> A: Show contracts with payment status
+
+A -> AP: Record new payment for contract
+AP -> PC: GET /admin/payments/create?contract_id=X
+PC -> CM: Get contract details
+CM -> DB: SELECT * FROM contracts WHERE id = X
+DB -> CM: Return contract data
+CM -> PC: Contract information
+PC -> AP: Display payment form
+AP -> A: Show payment form with contract info
+
+A -> AP: Fill payment details and submit
+AP -> PC: POST /admin/payments with payment data
+
+PC -> PC: Validate payment data
+alt Validation successful
+    PC -> PM: Create payment record
+    PM -> DB: INSERT INTO payments
+    DB -> PM: Return payment ID
+
+    PC -> CM: Update contract payment status
+    CM -> DB: Calculate total payments for contract
+    DB -> CM: Return payment total
+
+    alt Contract fully paid
+        CM -> DB: UPDATE contracts SET payment_status = 'paid'
+        PC -> PG: Generate payment receipt
+        PG -> PG: Create receipt PDF
+    else Partial payment
+        CM -> DB: UPDATE contracts SET payment_status = 'partial'
+    end
+
+    PC -> ES: Send payment confirmation to customer
+    ES -> ES: Queue payment confirmation email
+
+    PC -> A: Show success message with updated status
+else Validation failed
+    PC -> A: Return validation errors
+end
+
+@enduml
+
+@startuml Sequence Diagram - Admin Dashboard Data Loading Process
+
+title Sequence Diagram - Admin Dashboard Data Loading Process
+
+actor Admin as A
+participant "Dashboard" as D
+participant "DashboardController" as DC
+participant "User Model" as UM
+participant "Inquiry Model" as IM
+participant "Project Model" as PM
+participant "Contract Model" as CM
+participant "Database" as DB
+participant "Cache System" as CS
+
+A -> D: Access admin dashboard
+D -> DC: GET /admin/dashboard
+
+DC -> CS: Check for cached dashboard data
+alt Cache hit (data less than 5 minutes old)
+    CS -> DC: Return cached dashboard data
+else Cache miss or expired
+    par Get customer statistics
+        DC -> UM: Get customer count and growth
+        UM -> DB: SELECT COUNT(*) FROM users WHERE role = 'customer'
+        DB -> UM: Return customer count
+        UM -> DB: SELECT COUNT(*) FROM users WHERE role = 'customer' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        DB -> UM: Return new customers this month
+        UM -> DC: Customer statistics
+    and Get inquiry statistics
+        DC -> IM: Get inquiry statistics
+        IM -> DB: SELECT COUNT(*), status FROM inquiries GROUP BY status
+        DB -> IM: Return inquiry status breakdown
+        IM -> DB: SELECT COUNT(*) FROM inquiries WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        DB -> IM: Return new inquiries this week
+        IM -> DC: Inquiry statistics
+    and Get project statistics
+        DC -> PM: Get project statistics
+        PM -> DB: SELECT COUNT(*), status FROM projects GROUP BY status
+        DB -> PM: Return project status breakdown
+        PM -> DB: SELECT COUNT(*) FROM projects WHERE status = 'in_progress'
+        DB -> PM: Return active projects count
+        PM -> DC: Project statistics
+    and Get revenue statistics
+        DC -> CM: Get revenue statistics
+        CM -> DB: SELECT SUM(total_amount) FROM contracts WHERE payment_status = 'paid'
+        DB -> CM: Return total revenue
+        CM -> DB: SELECT SUM(total_amount) FROM contracts WHERE payment_status = 'paid' AND MONTH(created_at) = MONTH(NOW())
+        DB -> CM: Return monthly revenue
+        CM -> DC: Revenue statistics
+    end
+
+    DC -> CS: Cache dashboard data for 5 minutes
+end
+
+DC -> D: Return compiled dashboard data
+D -> A: Display dashboard with statistics and charts
+
+@enduml
+
+@startuml Sequence Diagram - Customer Project Status Update Process
+
+title Sequence Diagram - Customer Project Status Update Process
+
+actor Customer as C
+participant "Customer Dashboard" as CD
+participant "ProjectController" as PC
+participant "Project Model" as PM
+participant "Database" as DB
+participant "Notification Service" as NS
+
+C -> CD: Access customer dashboard
+CD -> PC: GET /customer/projects
+PC -> PM: Get customer's projects
+PM -> DB: SELECT * FROM projects WHERE user_id = ? ORDER BY created_at DESC
+DB -> PM: Return customer projects
+PM -> PC: Projects collection
+PC -> CD: Display projects list
+CD -> C: Show customer's projects
+
+C -> CD: Select project to view details
+CD -> PC: GET /customer/projects/{id}
+PC -> PM: Get project details with updates
+PM -> DB: SELECT * FROM projects WHERE id = ? AND user_id = ?
+DB -> PM: Return project data
+PM -> PC: Project details
+PC -> CD: Display project information
+CD -> C: Show detailed project view
+
+alt New updates available
+    CD -> C: Highlight new updates with notification badge
+    C -> CD: View updates
+    CD -> PC: Mark updates as viewed
+    PC -> PM: Update last_viewed timestamp
+    PM -> DB: UPDATE projects SET customer_last_viewed = NOW()
+end
+
+alt Customer wants to communicate about project
+    C -> CD: Click chat/message button
+    CD -> NS: Open chat interface for this project
+    NS -> NS: Initialize chat session with project context
+    NS -> C: Display chat interface
+end
+
+@enduml

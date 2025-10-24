@@ -1,0 +1,125 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC11: Lihat Status Project**
+
+|Customer|
+start
+:Login ke sistem customer;
+:Akses menu "My Projects";
+
+|Sistem|
+:Load halaman project customer;
+:Query project berdasarkan customer ID;
+:Load status dan progress setiap project;
+:Tampilkan daftar project dengan status;
+
+|Customer|
+:Lihat daftar project;
+:Review status setiap project;
+
+if (Ada project yang ingin dilihat detail?) then (Ya)
+  :Klik project untuk detail;
+  
+  |Sistem|
+  :Load detail project lengkap;
+  :Query timeline project;
+  :Query progress updates;
+  :Query foto progress (jika ada);
+  :Tampilkan detail project;
+  
+  |Customer|
+  :Lihat detail project;
+  :Review timeline project;
+  :Lihat progress percentage;
+  :Lihat foto progress terbaru;
+  
+  if (Ingin lihat kontrak?) then (Ya)
+    if (Kontrak sudah tersedia?) then (Ya)
+      :Klik "View Contract";
+      
+      |Sistem|
+      :Redirect ke UC12 (Download Kontrak PDF);
+      
+      |Customer|
+      :Akses halaman kontrak;
+    else (Tidak)
+      |Sistem|
+      :Tampilkan "Kontrak belum tersedia";
+      
+      |Customer|
+      :Lihat status kontrak pending;
+    endif
+  else (Tidak)
+    :Lanjut review project;
+  endif
+  
+  if (Ingin chat dengan admin?) then (Ya)
+    :Klik "Chat Admin";
+    
+    |Sistem|
+    :Redirect ke UC06 (Chat dengan Admin);
+    :Set context project untuk chat;
+    
+    |Customer|
+    :Mulai chat dengan context project;
+  else (Tidak)
+    :Selesai review detail;
+  endif
+else (Tidak)
+  :Selesai lihat daftar project;
+endif
+
+' MERGE POINT - All paths converge here
+|Customer|
+:Selesai lihat status project;
+
+|Sistem|
+:Update customer_last_viewed timestamp;
+:Log project view activity;
+' SINGLE END POINT
+stop
+
+@enduml

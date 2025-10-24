@@ -1,0 +1,85 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+' Pengaturan untuk menghindari overlapping
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 40
+skinparam minlen 2
+
+title **Activity Diagram - Contoh Clean Flow**
+
+|Admin|
+start
+:Akses halaman login;
+
+note right
+  Activity terpisah dengan jelas
+end note
+
+:Input email dan password;
+:Klik tombol login;
+
+|Sistem|
+:Validasi kredensial;
+
+if (Kredensial valid?) then (Ya)
+  :Buat session admin;
+  :Redirect ke dashboard;
+  
+  |Admin|
+  :Lihat dashboard;
+  :Akses menu;
+  
+  |Sistem|
+  stop
+  
+else (Tidak)
+  :Tampilkan pesan error;
+  
+  |Admin|
+  :Kembali ke halaman login;
+  
+  |Sistem|
+  stop
+endif
+
+@enduml

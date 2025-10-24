@@ -1,0 +1,101 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+
+title **Activity Diagram - UC13: Lihat Status Project (extend UC14: Download Kontrak PDF)**
+
+|Customer|
+start
+:Akses menu status project;
+
+|Sistem|
+:Load data project customer;
+:Query project dengan relasi service dan contract;
+:Tampilkan daftar project customer;
+
+|Customer|
+:Lihat daftar project;
+:Pilih project yang ingin dilihat;
+
+|Sistem|
+:Load detail project;
+:Tampilkan timeline project;
+:Tampilkan progress percentage;
+:Tampilkan project photos;
+:Tampilkan budget information;
+:Update customer_last_viewed timestamp;
+
+|Customer|
+:Lihat detail progress project;
+:Lihat timeline dan milestone;
+:Lihat foto progress dari admin;
+
+if (Ada kontrak dan ingin download?) then (Ya)
+  :Klik "Download Kontrak PDF";
+
+  |Sistem|
+  :Validasi kontrak tersedia;
+  :Generate PDF kontrak (UC14);
+  :Download file kontrak PDF;
+
+  |Customer|
+  :Terima file kontrak PDF;
+
+  |Sistem|
+  stop
+else (Tidak)
+  if (Ingin chat dengan admin?) then (Ya)
+    :Klik "Chat Admin";
+
+    |Sistem|
+    :Redirect ke UC15 (Chat dengan Admin);
+    stop
+  else (Tidak)
+    :Kembali ke dashboard;
+
+    |Sistem|
+    :Redirect ke UC8 (Dashboard Customer);
+    stop
+  endif
+endif
+
+@enduml

@@ -1,0 +1,87 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling sesuai contoh yang diberikan
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam sequence {
+    ArrowColor black
+    ActorBorderColor black
+    LifeLineBorderColor black
+    ParticipantBorderColor #1976D2
+    ParticipantBackgroundColor #E3F2FD
+    BoxBorderColor black
+}
+
+hide footbox
+
+title **Sequence Diagram - UC13: Registrasi Akun**
+
+participant "Guest" as Guest
+participant "RegistrationPage" as RegPage
+participant "RegistrationController" as RegCtrl
+participant "User Model" as UserModel
+
+Guest -> RegPage: 1: Registration (name, email, password, phone, address)
+activate RegPage
+
+RegPage -> RegCtrl: 1.1: store(registration_data)
+activate RegCtrl
+
+RegCtrl -> UserModel: 1.1.1: checkEmailExists(email)
+activate UserModel
+
+alt [Email Not Exists]
+    UserModel --> RegCtrl: 1.1.1.1: emailAvailable()
+    
+    RegCtrl -> UserModel: 1.1.1.1.1: create(user_data)
+    UserModel --> RegCtrl: 1.1.1.1.1.1: userCreated()
+    
+    RegCtrl -> UserModel: 1.1.1.1.1.1.1: generateVerificationToken()
+    UserModel --> RegCtrl: 1.1.1.1.1.1.1.1: tokenGenerated()
+    
+    RegCtrl --> RegPage: 1.1.1.1.1.1.2: showRegistrationSuccess()
+    RegPage --> Guest: 1.1.1.1.1.1.2.1: displaySuccessMessage()
+    
+else [Email Already Exists]
+    UserModel --> RegCtrl: 1.1.1.2: emailTaken()
+    RegCtrl --> RegPage: 1.1.1.2.1: showEmailError()
+    RegPage --> Guest: 1.1.1.2.1.1: displayEmailError()
+end
+
+alt [Registration Success]
+    RegCtrl -> UserModel: 1.1.2: sendVerificationEmail()
+    UserModel --> RegCtrl: 1.1.2.1: emailSent()
+    
+    RegCtrl --> RegPage: 1.1.2.1.1: showVerificationPrompt()
+    RegPage --> Guest: 1.1.2.1.1.1: displayVerificationMessage()
+    
+    Guest -> RegPage: 1.1.2.1.1.1.1: clickVerificationLink()
+    RegPage -> RegCtrl: 1.1.2.1.1.1.1.1: verifyEmail(token)
+    
+    RegCtrl -> UserModel: 1.1.2.1.1.1.1.1.1: markEmailAsVerified()
+    UserModel --> RegCtrl: 1.1.2.1.1.1.1.1.1.1: emailVerified()
+    
+    RegCtrl --> RegPage: 1.1.2.1.1.1.1.1.2: autoLogin()
+    RegPage --> Guest: 1.1.2.1.1.1.1.1.2.1: redirectToCustomerDashboard()
+end
+
+deactivate UserModel
+deactivate RegCtrl
+deactivate RegPage
+
+@enduml

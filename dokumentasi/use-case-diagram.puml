@@ -1,0 +1,184 @@
+@startuml Use Case Diagram - ARDFYA v2.1
+
+!theme plain
+title Use Case Diagram - ARDFYA v2.1 Construction Management System
+
+' Actors
+actor Guest as G
+actor Customer as C
+actor Admin as A
+
+' System boundary
+rectangle "ARDFYA v2.1 System" {
+  
+  ' Guest Use Cases
+  package "Public Features" {
+    usecase "Browse Homepage" as UC1
+    usecase "View Portfolio Gallery" as UC2
+    usecase "View Portfolio Detail" as UC3
+    usecase "Submit Contact Form" as UC4
+    usecase "Submit Inquiry" as UC5
+    usecase "Register Account" as UC6
+    usecase "Login to System" as UC7
+    usecase "View About Page" as UC8
+    usecase "View Services" as UC9
+  }
+  
+  ' Customer Use Cases
+  package "Customer Features" {
+    usecase "Manage Profile" as UC10
+    usecase "View Dashboard" as UC11
+    usecase "Track My Projects" as UC12
+    usecase "View My Inquiries" as UC13
+    usecase "Chat with Admin" as UC14
+    usecase "View My Contracts" as UC15
+    usecase "Download Contract PDF" as UC16
+    usecase "Update Profile Info" as UC17
+    usecase "Change Password" as UC18
+    usecase "View Project Progress" as UC19
+
+  }
+  
+  ' Admin Use Cases
+  package "Admin Management" {
+    usecase "Access Admin Dashboard" as UC21
+    usecase "Manage Customers" as UC22
+    usecase "Manage Inquiries" as UC23
+    usecase "Manage Projects" as UC24
+    usecase "Manage Contracts" as UC25
+    usecase "Manage Services" as UC26
+    usecase "View Analytics" as UC27
+    usecase "Generate Reports" as UC28
+    usecase "Admin Chat Management" as UC29
+    usecase "System Configuration" as UC30
+  }
+  
+  ' Portfolio Management (NEW v2.1)
+  package "Portfolio Management" {
+    usecase "Create Portfolio" as UC31
+    usecase "Edit Portfolio" as UC32
+    usecase "Delete Portfolio" as UC33
+    usecase "Upload Portfolio Images" as UC34
+    usecase "Set Featured Portfolio" as UC35
+    usecase "Manage Portfolio Categories" as UC36
+    usecase "View Portfolio Analytics" as UC37
+  }
+  
+  ' Project Management Details
+  package "Project Management" {
+    usecase "Create New Project" as UC38
+    usecase "Update Project Status" as UC39
+    usecase "Assign Project Team" as UC40
+    usecase "Track Project Progress" as UC41
+    usecase "Manage Project Budget" as UC42
+    usecase "Schedule Project Timeline" as UC43
+    usecase "Upload Project Photos" as UC44
+  }
+  
+  ' Contract Management Details
+  package "Contract Management" {
+    usecase "Generate Contract" as UC45
+    usecase "Edit Contract Terms" as UC46
+    usecase "Send Contract to Customer" as UC47
+
+    usecase "Generate Invoice" as UC50
+  }
+  
+  ' Communication Features
+  package "Communication" {
+    usecase "Send Message" as UC51
+    usecase "Receive Message" as UC52
+    usecase "Mark Message as Read" as UC53
+    usecase "View Chat History" as UC54
+    usecase "Send Notification" as UC55
+  }
+}
+
+' Guest relationships
+G --> UC1
+G --> UC2
+G --> UC3
+G --> UC4
+G --> UC5
+G --> UC6
+G --> UC7
+G --> UC8
+G --> UC9
+
+' Customer relationships
+C --> UC1
+C --> UC2
+C --> UC3
+C --> UC7
+C --> UC10
+C --> UC11
+C --> UC12
+C --> UC13
+C --> UC14
+C --> UC15
+C --> UC16
+C --> UC17
+C --> UC18
+C --> UC19
+
+C --> UC51
+C --> UC52
+C --> UC53
+C --> UC54
+
+' Admin relationships
+A --> UC21
+A --> UC22
+A --> UC23
+A --> UC24
+A --> UC25
+A --> UC26
+A --> UC27
+A --> UC28
+A --> UC29
+A --> UC30
+A --> UC31
+A --> UC32
+A --> UC33
+A --> UC34
+A --> UC35
+A --> UC36
+A --> UC37
+A --> UC38
+A --> UC39
+A --> UC40
+A --> UC41
+A --> UC42
+A --> UC43
+A --> UC44
+A --> UC45
+A --> UC46
+A --> UC47
+
+A --> UC50
+A --> UC51
+A --> UC52
+A --> UC53
+A --> UC54
+A --> UC55
+
+' Include relationships
+UC5 ..> UC6 : <<include>>
+UC13 ..> UC7 : <<include>>
+UC12 ..> UC7 : <<include>>
+UC15 ..> UC7 : <<include>>
+UC24 ..> UC23 : <<include>>
+UC25 ..> UC24 : <<include>>
+UC31 ..> UC21 : <<include>>
+UC38 ..> UC23 : <<include>>
+UC45 ..> UC24 : <<include>>
+
+' Extend relationships
+UC16 ..> UC15 : <<extend>>
+
+UC37 ..> UC31 : <<extend>>
+UC44 ..> UC41 : <<extend>>
+
+UC55 ..> UC51 : <<extend>>
+
+@enduml

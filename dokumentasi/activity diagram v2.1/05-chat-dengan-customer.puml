@@ -1,0 +1,138 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC05: Chat dengan Customer**
+
+|Admin|
+start
+:Login ke sistem admin;
+:Akses menu "Chat Customer";
+
+|Sistem|
+:Load halaman chat management;
+:Query daftar customer dengan chat aktif;
+:Tampilkan list customer dan status chat;
+
+|Admin|
+:Lihat daftar customer;
+:Pilih customer untuk chat;
+
+|Sistem|
+:Load riwayat chat dengan customer;
+:Tampilkan chat history;
+:Set status admin = online;
+:Notify customer bahwa admin online;
+
+|Admin|
+:Baca pesan dari customer;
+:Ketik balasan pesan;
+
+if (Jenis pesan?) then (Text Message)
+  :Tulis pesan text;
+  :Klik send;
+  
+  |Sistem|
+  :Simpan pesan ke database;
+  :Kirim pesan ke customer real-time;
+  :Update timestamp pesan;
+  
+  |Admin|
+  :Lihat pesan terkirim;
+else if (File/Image)
+  :Upload file atau gambar;
+  :Add caption (opsional);
+  :Send file;
+  
+  |Sistem|
+  :Upload file ke storage;
+  :Generate file URL;
+  :Simpan pesan dengan attachment;
+  :Kirim notifikasi ke customer;
+  
+  |Admin|
+  :Konfirmasi file terkirim;
+else (Quick Reply)
+  :Pilih template quick reply;
+  :Customize pesan jika perlu;
+  :Send quick reply;
+  
+  |Sistem|
+  :Load template message;
+  :Simpan pesan ke database;
+  :Kirim ke customer;
+  
+  |Admin|
+  :Lihat quick reply terkirim;
+endif
+
+|Sistem|
+:Update chat status;
+:Mark pesan sebagai read;
+
+if (Customer reply?) then (Ya)
+  :Receive pesan dari customer;
+  :Tampilkan notifikasi pesan baru;
+  
+  |Admin|
+  :Baca pesan customer;
+  :Siapkan balasan;
+else (Tidak)
+  :Set status chat = waiting;
+  
+  |Admin|
+  :Tunggu response atau lanjut chat lain;
+endif
+
+' MERGE POINT - All paths converge here
+|Admin|
+:Selesai sesi chat;
+
+|Sistem|
+:Update status admin = offline;
+:Save chat session;
+' SINGLE END POINT
+stop
+
+@enduml

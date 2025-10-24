@@ -1,0 +1,103 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk use case diagram yang simple
+skinparam usecase {
+    BackgroundColor #87CEEB
+    BorderColor #4682B4
+    BorderThickness 2
+    FontSize 10
+    FontColor black
+}
+
+skinparam actor {
+    BackgroundColor white
+    BorderColor black
+    BorderThickness 2
+    FontSize 11
+    FontColor black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 1
+}
+
+' Pengaturan untuk layout yang rapi
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 60
+
+title **Use Case Diagram - ARDFYA v2.1 (Updated)**
+
+' Actors dengan hierarki 4 level
+:Customer: as Customer
+:Admin: as Admin
+:Guest: as Guest
+
+' User sebagai generalisasi
+:User: as User
+
+' Generalization relationships
+Customer --|> User : inherits
+Admin --|> User : inherits
+Guest --|> User : inherits
+
+rectangle "ARDFYA System" {
+    ' Use Cases berdasarkan gambar
+    (Login) as UC1
+    (Proses Inquiry) as UC2
+    (Kelola Data Customer) as UC3
+    (Kelola Portfolio) as UC4
+    (Chat dengan Customer) as UC5
+    (Chat dengan Admin) as UC6
+    (Lihat Dashboard Customer) as UC7
+    (Kelola Profil Customer) as UC8
+    (Ajukan Inquiry) as UC9
+    (Chat dengan Admin) as UC10
+    (Lihat Dashboard Admin) as UC11
+    (Lihat Status Project) as UC12
+    (Download Kontrak PDF) as UC13
+    (Ajukan Inquiry) as UC14
+    (Registrasi Akun) as UC15
+    (Kelola Project) as UC16
+    (Generate Kontrak) as UC17
+    (Lihat Detail Inquiry) as UC18
+    (Lihat Portfolio) as UC19
+}
+
+' Actor relationships berdasarkan gambar
+Customer --> UC1
+Customer --> UC7
+Customer --> UC8
+Customer --> UC9
+Customer --> UC10
+Customer --> UC12
+Customer --> UC13
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC11
+Admin --> UC16
+Admin --> UC17
+
+Guest --> UC14
+Guest --> UC15
+Guest --> UC19
+
+' Include relationships
+UC2 .> UC16 : <<include>>
+UC16 .> UC17 : <<include>>
+UC9 .> UC15 : <<include>>
+
+' Extend relationships
+UC18 .> UC2 : <<extend>>
+
+@enduml

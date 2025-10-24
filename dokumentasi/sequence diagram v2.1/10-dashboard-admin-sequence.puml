@@ -1,0 +1,80 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling sesuai contoh yang diberikan
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam sequence {
+    ArrowColor black
+    ActorBorderColor black
+    LifeLineBorderColor black
+    ParticipantBorderColor #1976D2
+    ParticipantBackgroundColor #E3F2FD
+    BoxBorderColor black
+}
+
+hide footbox
+
+title **Sequence Diagram - UC10: Dashboard Admin**
+
+participant "Admin" as Admin
+participant "AdminDashboardPage" as DashboardPage
+participant "AdminDashboardController" as DashboardCtrl
+participant "Multiple Models" as Models
+
+Admin -> DashboardPage: 1: AccessAdminDashboard()
+activate DashboardPage
+
+DashboardPage -> DashboardCtrl: 1.1: index()
+activate DashboardCtrl
+
+DashboardCtrl -> Models: 1.1.1: loadDashboardData()
+activate Models
+
+Models -> Models: 1.1.1.1: getUserStatistics()
+Models -> Models: 1.1.1.2: getInquiryStatistics()
+Models -> Models: 1.1.1.3: getProjectStatistics()
+Models -> Models: 1.1.1.4: getContractStatistics()
+
+Models --> DashboardCtrl: 1.1.1.5: dashboardMetrics()
+
+DashboardCtrl -> Models: 1.1.2: getRecentInquiries()
+Models --> DashboardCtrl: 1.1.2.1: recentInquiriesList()
+
+DashboardCtrl -> Models: 1.1.3: getActiveProjects()
+Models --> DashboardCtrl: 1.1.3.1: activeProjectsList()
+
+DashboardCtrl -> Models: 1.1.4: getRecentCustomers()
+Models --> DashboardCtrl: 1.1.4.1: recentCustomersList()
+
+alt [Has Pending Inquiries]
+    DashboardCtrl --> DashboardPage: 1.1.5: showPendingInquiries()
+    DashboardPage --> Admin: 1.1.5.1: displayPendingAlerts()
+    
+else [No Pending Items]
+    DashboardCtrl --> DashboardPage: 1.1.6: showNormalDashboard()
+    DashboardPage --> Admin: 1.1.6.1: displayStandardView()
+end
+
+DashboardCtrl --> DashboardPage: 1.1.7: renderAdminDashboard()
+DashboardPage --> Admin: 1.1.7.1: displayAdminDashboard()
+
+deactivate Models
+deactivate DashboardCtrl
+deactivate DashboardPage
+
+@enduml

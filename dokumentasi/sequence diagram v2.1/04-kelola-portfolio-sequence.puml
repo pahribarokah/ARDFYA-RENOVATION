@@ -1,0 +1,88 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling sesuai contoh yang diberikan
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam sequence {
+    ArrowColor black
+    ActorBorderColor black
+    LifeLineBorderColor black
+    ParticipantBorderColor #1976D2
+    ParticipantBackgroundColor #E3F2FD
+    BoxBorderColor black
+}
+
+hide footbox
+
+title **Sequence Diagram - UC04: Kelola Portfolio**
+
+participant "Admin" as Admin
+participant "PortfolioManagePage" as PortfolioPage
+participant "AdminPortfolioController" as PortfolioCtrl
+participant "Portfolio Model" as PortfolioModel
+
+Admin -> PortfolioPage: 1: ManagePortfolio (action, portfolio_data)
+activate PortfolioPage
+
+PortfolioPage -> PortfolioCtrl: 1.1: performAction(action, portfolio_data)
+activate PortfolioCtrl
+
+alt [Create Portfolio]
+    PortfolioCtrl -> PortfolioModel: 1.1.1: store(portfolio_data)
+    activate PortfolioModel
+    
+    PortfolioModel --> PortfolioCtrl: 1.1.1.1: portfolioCreated()
+    PortfolioCtrl --> PortfolioPage: 1.1.1.1.1: showCreateSuccess()
+    PortfolioPage --> Admin: 1.1.1.1.1.1: displaySuccessMessage()
+    
+else [Edit Portfolio]
+    PortfolioCtrl -> PortfolioModel: 1.1.2: find(portfolio_id)
+    activate PortfolioModel
+    
+    PortfolioModel --> PortfolioCtrl: 1.1.2.1: portfolioData()
+    
+    PortfolioCtrl -> PortfolioModel: 1.1.2.2: update(portfolio_data)
+    PortfolioModel --> PortfolioCtrl: 1.1.2.2.1: updateSuccess()
+    PortfolioCtrl --> PortfolioPage: 1.1.2.2.1.1: showUpdateSuccess()
+    PortfolioPage --> Admin: 1.1.2.2.1.1.1: displaySuccessMessage()
+    
+else [Delete Portfolio]
+    PortfolioCtrl -> PortfolioModel: 1.1.3: find(portfolio_id)
+    activate PortfolioModel
+    
+    PortfolioModel --> PortfolioCtrl: 1.1.3.1: portfolioData()
+    
+    PortfolioCtrl -> PortfolioModel: 1.1.3.2: destroy()
+    PortfolioModel --> PortfolioCtrl: 1.1.3.2.1: portfolioDeleted()
+    PortfolioCtrl --> PortfolioPage: 1.1.3.2.1.1: showDeleteSuccess()
+    PortfolioPage --> Admin: 1.1.3.2.1.1.1: displaySuccessMessage()
+    
+else [View Portfolio List]
+    PortfolioCtrl -> PortfolioModel: 1.1.4: scopeActive()
+    activate PortfolioModel
+    
+    PortfolioModel --> PortfolioCtrl: 1.1.4.1: portfolioList()
+    PortfolioCtrl --> PortfolioPage: 1.1.4.1.1: displayPortfolios()
+    PortfolioPage --> Admin: 1.1.4.1.1.1: showPortfolioList()
+end
+
+deactivate PortfolioModel
+deactivate PortfolioCtrl
+deactivate PortfolioPage
+
+@enduml

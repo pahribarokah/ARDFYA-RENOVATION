@@ -1,0 +1,105 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC01: Login**
+
+|User|
+start
+:Akses halaman login;
+:Input email/username;
+:Input password;
+:Klik tombol "Login";
+
+|Sistem|
+:Validasi format email;
+:Cek kredensial di database;
+
+if (Kredensial valid?) then (Ya)
+  :Ambil data user dari database;
+  :Generate session token;
+  :Set user session;
+  
+  if (Role user?) then (Customer)
+    :Redirect ke dashboard customer;
+    
+    |User|
+    :Akses dashboard customer;
+  else if (Admin)
+    :Redirect ke dashboard admin;
+    
+    |User|
+    :Akses dashboard admin;
+  else (Guest)
+    :Redirect ke homepage;
+    
+    |User|
+    :Akses homepage;
+  endif
+else (Tidak)
+  :Tampilkan error message;
+  :Log failed login attempt;
+  
+  |User|
+  :Lihat pesan error;
+  
+  if (Coba lagi?) then (Ya)
+    :Input ulang kredensial;
+    
+    |Sistem|
+    :Reset form login;
+  else (Tidak)
+    :Keluar dari halaman login;
+  endif
+endif
+
+' MERGE POINT - All paths converge here
+|User|
+:Selesai proses login;
+
+|Sistem|
+' SINGLE END POINT
+stop
+
+@enduml

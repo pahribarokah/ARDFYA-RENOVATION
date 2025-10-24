@@ -1,0 +1,92 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling sesuai contoh yang diberikan
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam sequence {
+    ArrowColor black
+    ActorBorderColor black
+    LifeLineBorderColor black
+    ParticipantBorderColor #1976D2
+    ParticipantBackgroundColor #E3F2FD
+    BoxBorderColor black
+}
+
+hide footbox
+
+title **Sequence Diagram - UC14: Kelola Project**
+
+participant "Admin" as Admin
+participant "ProjectManagePage" as ProjectPage
+participant "AdminProjectController" as ProjectCtrl
+participant "Project Model" as ProjectModel
+
+Admin -> ProjectPage: 1: ManageProject (action, project_data)
+activate ProjectPage
+
+ProjectPage -> ProjectCtrl: 1.1: performAction(action, project_data)
+activate ProjectCtrl
+
+alt [Create New Project]
+    ProjectCtrl -> ProjectModel: 1.1.1: store(project_data)
+    activate ProjectModel
+    
+    ProjectModel -> ProjectModel: 1.1.1.1: user()
+    ProjectModel -> ProjectModel: 1.1.1.2: service()
+    ProjectModel -> ProjectModel: 1.1.1.3: inquiry()
+    
+    ProjectModel --> ProjectCtrl: 1.1.1.4: projectCreated()
+    ProjectCtrl --> ProjectPage: 1.1.1.4.1: showCreateSuccess()
+    ProjectPage --> Admin: 1.1.1.4.1.1: displaySuccessMessage()
+    
+else [Update Project Progress]
+    ProjectCtrl -> ProjectModel: 1.1.2: find(project_id)
+    activate ProjectModel
+    
+    ProjectModel --> ProjectCtrl: 1.1.2.1: projectData()
+    
+    ProjectCtrl -> ProjectModel: 1.1.2.2: updateProgress(progress_data)
+    ProjectModel --> ProjectCtrl: 1.1.2.2.1: progressUpdated()
+    
+    ProjectCtrl -> ProjectModel: 1.1.2.2.1.1: getProgressBarColorAttribute()
+    ProjectModel --> ProjectCtrl: 1.1.2.2.1.1.1: progressColor()
+    
+    ProjectCtrl --> ProjectPage: 1.1.2.2.2: showUpdateSuccess()
+    ProjectPage --> Admin: 1.1.2.2.2.1: displayUpdateSuccess()
+    
+else [Complete Project]
+    ProjectCtrl -> ProjectModel: 1.1.3: find(project_id)
+    activate ProjectModel
+    
+    ProjectModel --> ProjectCtrl: 1.1.3.1: projectData()
+    
+    ProjectCtrl -> ProjectModel: 1.1.3.2: update(status='completed')
+    ProjectModel --> ProjectCtrl: 1.1.3.2.1: projectCompleted()
+    
+    ProjectCtrl -> ProjectModel: 1.1.3.2.1.1: getStatusColorAttribute()
+    ProjectModel --> ProjectCtrl: 1.1.3.2.1.1.1: statusColor()
+    
+    ProjectCtrl --> ProjectPage: 1.1.3.2.2: showCompletionSuccess()
+    ProjectPage --> Admin: 1.1.3.2.2.1: displayCompletionMessage()
+end
+
+deactivate ProjectModel
+deactivate ProjectCtrl
+deactivate ProjectPage
+
+@enduml

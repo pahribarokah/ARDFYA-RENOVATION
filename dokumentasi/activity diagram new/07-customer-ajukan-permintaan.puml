@@ -1,0 +1,102 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam minlen 4
+skinparam padding 15
+
+title **Activity Diagram - UC7: Ajukan Inquiry (include UC5: Registrasi Akun)**
+
+|Guest/Customer|
+start
+:Akses form ajukan inquiry;
+
+|Sistem|
+:Load form inquiry;
+:Query layanan yang tersedia;
+:Tampilkan form inquiry dengan layanan;
+
+|Guest/Customer|
+:Isi form inquiry lengkap;
+:Input nama dan email;
+:Input nomor telepon;
+:Pilih layanan yang diinginkan;
+:Input jenis properti;
+:Input alamat proyek;
+:Input luas area;
+:Input budget yang dimiliki;
+:Input deskripsi kebutuhan detail;
+:Input tanggal mulai yang diinginkan;
+:Submit form inquiry;
+
+|Sistem|
+:Validasi data form inquiry;
+if (Data valid?) then (Ya)
+  :Simpan inquiry ke database;
+  if (User belum terdaftar?) then (Ya)
+    :Suggest registrasi akun (UC5);
+    :Auto-create customer account;
+    :Link inquiry dengan customer;
+  else (Tidak)
+    :Link inquiry dengan customer existing;
+  endif
+  :Kirim email notifikasi ke admin;
+  :Kirim email konfirmasi ke customer;
+
+  |Customer|
+  :Terima konfirmasi inquiry;
+  :Dapat akses ke UC11 (Lihat Daftar Inquiry);
+
+  |Sistem|
+  stop
+else (Tidak)
+  :Tampilkan pesan error validasi;
+
+  |Guest/Customer|
+  :Perbaiki data form;
+
+  |Sistem|
+  stop
+endif
+
+@enduml

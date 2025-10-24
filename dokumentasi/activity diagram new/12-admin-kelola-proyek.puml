@@ -1,0 +1,117 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam minlen 4
+skinparam padding 15
+
+title **Activity Diagram - UC19: Kelola Project (include UC20: Generate Kontrak)**
+
+|Admin|
+start
+:Akses menu kelola project;
+
+|Sistem|
+:Load daftar project;
+:Query project dengan relasi user dan service;
+:Tampilkan daftar project dengan status;
+
+|Admin|
+:Lihat daftar project customer;
+:Filter berdasarkan status (opsional);
+
+if (Aksi yang dipilih?) then (Create New Project)
+  :Klik "Create Project";
+  :Pilih customer dan service;
+  :Input detail project;
+  :Set timeline dan budget;
+  :Submit form project;
+
+  |Sistem|
+  :Validasi data project;
+  :Simpan project ke database;
+  :Auto-generate contract (UC20);
+  :Kirim notifikasi ke customer;
+  stop
+else if (Update Existing Project)
+  :Pilih project untuk update;
+
+  |Sistem|
+  :Load detail project;
+
+  |Admin|
+  :Update progress percentage;
+  :Upload foto progress;
+  :Update timeline details;
+  :Add project notes;
+  :Submit update;
+
+  |Sistem|
+  :Update project data;
+  :Update customer_last_viewed;
+  :Broadcast real-time update;
+  :Kirim notifikasi progress ke customer;
+  stop
+else if (Complete Project)
+  :Pilih project untuk complete;
+  :Set status = 'completed';
+  :Set actual_end_date;
+  :Add completion notes;
+
+  |Sistem|
+  :Update project status;
+  :Generate final contract (UC20);
+  :Add project to portfolio (opsional);
+  :Kirim notifikasi completion;
+  stop
+else (View Project Detail)
+  :Pilih project untuk view;
+
+  |Sistem|
+  :Tampilkan detail lengkap project;
+  :Tampilkan timeline dan progress;
+  :Tampilkan contract information;
+  stop
+endif
+
+@enduml

@@ -1,0 +1,103 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+
+title **Activity Diagram - UC16: Lihat Dashboard Admin (include UC23: Generate Laporan)**
+
+|Admin|
+start
+:Login berhasil ke admin panel;
+
+|Sistem|
+:Validasi session admin dengan AdminMiddleware;
+:Load dashboard admin;
+:Query statistik bisnis (UC23);
+:Query total customers, inquiries, projects;
+:Query recent activities;
+:Generate analytics dan laporan;
+:Render dashboard dengan data lengkap;
+
+|Admin|
+:Lihat dashboard admin;
+:Lihat statistik bisnis dan analytics;
+:Lihat laporan performance;
+:Lihat notifikasi sistem;
+
+if (Menu yang dipilih?) then (Kelola Customer)
+  :Klik menu customer;
+
+  |Sistem|
+  :Redirect ke UC17 (Kelola Data Customer);
+  stop
+else if (Kelola Portfolio)
+  :Klik menu portfolio;
+
+  |Sistem|
+  :Redirect ke UC21 (Kelola Portfolio);
+  stop
+else if (Proses Inquiry)
+  :Klik menu inquiry;
+
+  |Sistem|
+  :Redirect ke UC18 (Proses Inquiry);
+  stop
+else if (Kelola Project)
+  :Klik menu project;
+
+  |Sistem|
+  :Redirect ke UC19 (Kelola Project);
+  stop
+else if (Chat Customer)
+  :Klik menu chat;
+
+  |Sistem|
+  :Redirect ke UC22 (Chat dengan Customer);
+  stop
+else if (Logout)
+  :Klik logout;
+
+  |Sistem|
+  :Redirect ke UC25 (Logout dari Sistem);
+  stop
+endif
+
+@enduml

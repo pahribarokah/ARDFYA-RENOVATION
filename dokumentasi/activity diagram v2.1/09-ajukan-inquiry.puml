@@ -1,0 +1,134 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC09: Ajukan Inquiry**
+
+|User|
+start
+:Akses halaman inquiry;
+
+|Sistem|
+:Cek status login user;
+
+if (User sudah login?) then (Ya)
+  :Load form inquiry untuk logged user;
+  :Pre-fill data customer;
+else (Tidak)
+  :Tampilkan opsi login atau lanjut sebagai guest;
+  
+  if (Pilihan user?) then (Login)
+    :Redirect ke UC01 (Login);
+    :Kembali ke form inquiry setelah login;
+    
+    |Sistem|
+    :Load form dengan data customer;
+  else (Guest)
+    :Load form inquiry untuk guest;
+    :Tampilkan field data personal;
+  endif
+endif
+
+|User|
+:Isi form inquiry;
+:Input jenis layanan yang dibutuhkan;
+:Input deskripsi detail project;
+:Input budget estimasi;
+:Input timeline yang diinginkan;
+:Input lokasi project;
+
+if (Ada file pendukung?) then (Ya)
+  :Upload file gambar/dokumen;
+  :Add deskripsi file;
+  
+  |Sistem|
+  :Validasi tipe dan ukuran file;
+  :Upload file ke storage;
+  :Generate file URL;
+else (Tidak)
+  :Lanjut tanpa file;
+endif
+
+|User|
+:Review data inquiry;
+:Submit inquiry;
+
+|Sistem|
+:Validasi semua field required;
+
+if (Data lengkap dan valid?) then (Ya)
+  if (User adalah guest?) then (Ya)
+    :Suggest registrasi akun (include UC13);
+    :Simpan inquiry dengan status 'guest';
+    :Generate inquiry ID;
+    :Kirim email konfirmasi ke guest;
+  else (Customer)
+    :Simpan inquiry dengan customer ID;
+    :Generate inquiry ID;
+    :Set status = 'new';
+    :Kirim notifikasi ke admin;
+    :Kirim konfirmasi ke customer;
+  endif
+  
+  |User|
+  :Lihat konfirmasi inquiry berhasil dikirim;
+  :Dapatkan inquiry reference number;
+else (Tidak)
+  :Tampilkan error validasi;
+  
+  |User|
+  :Perbaiki data yang kurang/salah;
+endif
+
+' MERGE POINT - All paths converge here
+|User|
+:Selesai ajukan inquiry;
+
+|Sistem|
+:Log inquiry submission;
+:Update inquiry statistics;
+' SINGLE END POINT
+stop
+
+@enduml

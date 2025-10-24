@@ -1,0 +1,143 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC06: Chat dengan Admin**
+
+|Customer|
+start
+:Login ke sistem customer;
+:Akses menu "Chat Admin";
+
+|Sistem|
+:Load halaman chat customer;
+:Query riwayat chat dengan admin;
+:Tampilkan chat interface;
+:Cek status admin (online/offline);
+
+|Customer|
+:Lihat riwayat chat;
+:Cek status admin;
+
+if (Admin online?) then (Ya)
+  :Tampilkan indikator admin online;
+else (Tidak)
+  :Tampilkan "Admin sedang offline";
+endif
+
+|Customer|
+:Ketik pesan untuk admin;
+
+if (Jenis pesan?) then (Text Message)
+  :Tulis pesan text;
+  :Klik send;
+  
+  |Sistem|
+  :Simpan pesan ke database;
+  :Kirim pesan ke admin real-time;
+  :Update timestamp pesan;
+  :Kirim push notification ke admin;
+  
+  |Customer|
+  :Lihat pesan terkirim;
+  :Tunggu balasan admin;
+else if (File/Image)
+  :Upload file atau gambar;
+  :Add deskripsi file;
+  :Send file;
+  
+  |Sistem|
+  :Validasi tipe dan ukuran file;
+  :Upload file ke storage;
+  :Generate file URL;
+  :Simpan pesan dengan attachment;
+  :Notify admin ada file baru;
+  
+  |Customer|
+  :Konfirmasi file terkirim;
+  :Tunggu response admin;
+else (Inquiry Terkait)
+  :Pilih inquiry yang ingin dibahas;
+  :Add context inquiry;
+  :Send pesan dengan context;
+  
+  |Sistem|
+  :Link pesan dengan inquiry;
+  :Simpan context reference;
+  :Kirim ke admin dengan context;
+  
+  |Customer|
+  :Lihat pesan dengan context terkirim;
+endif
+
+|Sistem|
+:Update chat status;
+:Mark pesan sebagai sent;
+
+if (Admin reply?) then (Ya)
+  :Receive balasan dari admin;
+  :Tampilkan notifikasi pesan masuk;
+  :Mark pesan admin sebagai read;
+  
+  |Customer|
+  :Baca balasan admin;
+  :Siapkan response jika perlu;
+else (Tidak)
+  :Set status = waiting for admin;
+  
+  |Customer|
+  :Tunggu balasan atau keluar chat;
+endif
+
+' MERGE POINT - All paths converge here
+|Customer|
+:Selesai sesi chat;
+
+|Sistem|
+:Save chat session;
+:Update last activity timestamp;
+' SINGLE END POINT
+stop
+
+@enduml

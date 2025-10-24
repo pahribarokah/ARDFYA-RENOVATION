@@ -1,0 +1,79 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling sesuai contoh yang diberikan
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam sequence {
+    ArrowColor black
+    ActorBorderColor black
+    LifeLineBorderColor black
+    ParticipantBorderColor #1976D2
+    ParticipantBackgroundColor #E3F2FD
+    BoxBorderColor black
+}
+
+hide footbox
+
+title **Sequence Diagram - UC05: Chat dengan Customer**
+
+participant "Admin" as Admin
+participant "AdminChatPage" as ChatPage
+participant "ChatController" as ChatCtrl
+participant "Chat Model" as ChatModel
+
+Admin -> ChatPage: 1: SendMessage (customer_id, message, file)
+activate ChatPage
+
+ChatPage -> ChatCtrl: 1.1: adminReply(customer_id, message, file)
+activate ChatCtrl
+
+ChatCtrl -> ChatModel: 1.1.1: getMessages(customer_id)
+activate ChatModel
+
+ChatModel --> ChatCtrl: 1.1.1.1: chatHistory()
+
+alt [Text Message]
+    ChatCtrl -> ChatModel: 1.1.1.2: store(message_data)
+    ChatModel --> ChatCtrl: 1.1.1.2.1: messageStored()
+    ChatCtrl --> ChatPage: 1.1.1.2.1.1: showMessageSent()
+    ChatPage --> Admin: 1.1.1.2.1.1.1: displaySentMessage()
+    
+else [File Message]
+    ChatCtrl -> ChatModel: 1.1.1.3: store(message_with_file)
+    ChatModel --> ChatCtrl: 1.1.1.3.1: fileMessageStored()
+    ChatCtrl --> ChatPage: 1.1.1.3.1.1: showFileSent()
+    ChatPage --> Admin: 1.1.1.3.1.1.1: displaySentFile()
+    
+else [Quick Reply]
+    ChatCtrl -> ChatModel: 1.1.1.4: store(quick_reply_data)
+    ChatModel --> ChatCtrl: 1.1.1.4.1: quickReplyStored()
+    ChatCtrl --> ChatPage: 1.1.1.4.1.1: showQuickReplySent()
+    ChatPage --> Admin: 1.1.1.4.1.1.1: displayQuickReply()
+end
+
+ChatCtrl -> ChatModel: 1.1.2: markAsRead(customer_id)
+ChatModel --> ChatCtrl: 1.1.2.1: messagesMarkedAsRead()
+
+ChatCtrl --> ChatPage: 1.1.2.1.1: updateChatStatus()
+ChatPage --> Admin: 1.1.2.1.1.1: showUpdatedChat()
+
+deactivate ChatModel
+deactivate ChatCtrl
+deactivate ChatPage
+
+@enduml

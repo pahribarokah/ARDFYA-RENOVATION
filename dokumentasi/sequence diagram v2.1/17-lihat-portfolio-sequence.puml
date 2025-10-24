@@ -1,0 +1,87 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling sesuai contoh yang diberikan
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam sequence {
+    ArrowColor black
+    ActorBorderColor black
+    LifeLineBorderColor black
+    ParticipantBorderColor #1976D2
+    ParticipantBackgroundColor #E3F2FD
+    BoxBorderColor black
+}
+
+hide footbox
+
+title **Sequence Diagram - UC17: Lihat Portfolio**
+
+participant "Guest" as Guest
+participant "PortfolioPage" as PortfolioPage
+participant "HomeController" as HomeCtrl
+participant "Portfolio Model" as PortfolioModel
+
+Guest -> PortfolioPage: 1: ViewPortfolio (category_filter)
+activate PortfolioPage
+
+PortfolioPage -> HomeCtrl: 1.1: portfolio(category_filter)
+activate HomeCtrl
+
+HomeCtrl -> PortfolioModel: 1.1.1: scopeActive()
+activate PortfolioModel
+
+PortfolioModel --> HomeCtrl: 1.1.1.1: activePortfolios()
+
+alt [With Category Filter]
+    HomeCtrl -> PortfolioModel: 1.1.1.2: scopeByCategory(category)
+    PortfolioModel --> HomeCtrl: 1.1.1.2.1: filteredPortfolios()
+    
+else [No Filter]
+    HomeCtrl -> PortfolioModel: 1.1.1.3: scopeOrdered()
+    PortfolioModel --> HomeCtrl: 1.1.1.3.1: orderedPortfolios()
+end
+
+HomeCtrl -> PortfolioModel: 1.1.2: scopeFeatured()
+PortfolioModel --> HomeCtrl: 1.1.2.1: featuredPortfolios()
+
+HomeCtrl -> PortfolioModel: 1.1.3: getImageUrlAttribute()
+PortfolioModel --> HomeCtrl: 1.1.3.1: imageUrls()
+
+HomeCtrl -> PortfolioModel: 1.1.4: getFormattedValueAttribute()
+PortfolioModel --> HomeCtrl: 1.1.4.1: formattedValues()
+
+alt [Portfolio Detail View]
+    HomeCtrl --> PortfolioPage: 1.1.5: showPortfolioDetail()
+    PortfolioPage --> Guest: 1.1.5.1: displayDetailView()
+    
+else [Portfolio Grid View]
+    HomeCtrl --> PortfolioPage: 1.1.6: showPortfolioGrid()
+    PortfolioPage --> Guest: 1.1.6.1: displayGridView()
+end
+
+HomeCtrl -> PortfolioModel: 1.1.7: incrementViewCounter()
+PortfolioModel --> HomeCtrl: 1.1.7.1: counterUpdated()
+
+HomeCtrl --> PortfolioPage: 1.1.7.1.1: renderPortfolio()
+PortfolioPage --> Guest: 1.1.7.1.1.1: displayPortfolio()
+
+deactivate PortfolioModel
+deactivate HomeCtrl
+deactivate PortfolioPage
+
+@enduml

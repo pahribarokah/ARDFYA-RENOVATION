@@ -1,0 +1,139 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC17: Lihat Portfolio**
+
+|Guest|
+start
+:Akses website ARDFYA;
+:Navigasi ke menu Portfolio;
+
+|Sistem|
+:Load halaman portfolio;
+:Query portfolio yang published;
+:Load thumbnail images;
+:Tampilkan grid portfolio dengan kategori;
+
+|Guest|
+:Browse portfolio projects;
+:Lihat thumbnail dan judul;
+
+if (Ingin filter kategori?) then (Ya)
+  :Pilih kategori dari dropdown;
+  
+  |Sistem|
+  :Filter portfolio berdasarkan kategori;
+  :Update tampilan grid;
+  
+  |Guest|
+  :Lihat hasil filter;
+else (Tidak)
+  :Lihat semua portfolio;
+endif
+
+if (Ingin lihat detail project?) then (Ya)
+  :Klik portfolio item;
+  
+  |Sistem|
+  :Load detail portfolio;
+  :Load galeri foto lengkap;
+  :Load deskripsi detail project;
+  :Tampilkan kategori dan spesifikasi;
+  
+  |Guest|
+  :Review detail portfolio;
+  :Lihat galeri foto project;
+  :Baca deskripsi dan spesifikasi;
+  
+  if (Tertarik dengan layanan serupa?) then (Ya)
+    :Klik "Ajukan Inquiry Serupa";
+    
+    |Sistem|
+    :Redirect ke UC09 (Ajukan Inquiry);
+    :Pre-fill jenis layanan berdasarkan portfolio;
+    
+    |Guest|
+    :Isi form inquiry dengan referensi portfolio;
+  else (Tidak)
+    if (Ingin lihat portfolio lain?) then (Ya)
+      :Klik "Back to Portfolio";
+      
+      |Sistem|
+      :Kembali ke grid portfolio;
+      
+      |Guest|
+      :Browse portfolio lainnya;
+    else (Tidak)
+      :Selesai lihat detail;
+    endif
+  endif
+else (Tidak)
+  :Selesai browse portfolio;
+endif
+
+if (Ingin share portfolio?) then (Ya)
+  :Klik tombol share;
+  
+  |Sistem|
+  :Generate share URL;
+  :Tampilkan opsi share (social media, copy link);
+  
+  |Guest|
+  :Share portfolio ke social media atau copy link;
+else (Tidak)
+  :Tidak share portfolio;
+endif
+
+' MERGE POINT - All paths converge here
+|Guest|
+:Selesai lihat portfolio;
+
+|Sistem|
+:Log portfolio view activity;
+:Update portfolio view counter;
+' SINGLE END POINT
+stop
+
+@enduml

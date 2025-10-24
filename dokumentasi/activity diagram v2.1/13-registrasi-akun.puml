@@ -1,0 +1,137 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC13: Registrasi Akun**
+
+|Guest|
+start
+:Akses halaman registrasi;
+:Klik "Daftar Akun Baru";
+
+|Sistem|
+:Load form registrasi;
+:Tampilkan field yang required;
+
+|Guest|
+:Isi form registrasi;
+:Input nama lengkap;
+:Input email;
+:Input nomor telepon;
+:Input alamat;
+:Input password;
+:Konfirmasi password;
+:Centang agreement terms;
+
+|Sistem|
+:Validasi format email;
+:Validasi kekuatan password;
+:Validasi nomor telepon;
+:Cek email sudah terdaftar atau belum;
+
+if (Email sudah terdaftar?) then (Ya)
+  :Tampilkan error "Email sudah terdaftar";
+  :Suggest untuk login atau reset password;
+  
+  |Guest|
+  :Pilih login atau ganti email;
+  
+  if (Pilihan guest?) then (Login)
+    |Sistem|
+    :Redirect ke UC01 (Login);
+    
+    |Guest|
+    :Proses login dengan akun existing;
+  else (Ganti Email)
+    :Input email yang berbeda;
+    
+    |Sistem|
+    :Validasi email baru;
+  endif
+else (Tidak)
+  if (Semua data valid?) then (Ya)
+    :Hash password;
+    :Generate user ID;
+    :Simpan data user ke database;
+    :Set status = 'pending_verification';
+    :Generate verification token;
+    :Kirim email verifikasi;
+    :Tampilkan pesan sukses registrasi;
+    
+    |Guest|
+    :Lihat pesan "Cek email untuk verifikasi";
+    :Buka email;
+    :Klik link verifikasi;
+    
+    |Sistem|
+    :Validasi verification token;
+    :Set status = 'active';
+    :Update email_verified_at;
+    :Auto login user;
+    :Redirect ke dashboard customer;
+    
+    |Guest|
+    :Berhasil menjadi customer;
+    :Akses dashboard customer;
+  else (Tidak)
+    :Tampilkan error validasi;
+    :Highlight field yang salah;
+    
+    |Guest|
+    :Perbaiki data yang salah;
+    :Submit ulang form;
+  endif
+endif
+
+' MERGE POINT - All paths converge here
+|Guest|
+:Selesai proses registrasi;
+
+|Sistem|
+:Log registration activity;
+:Update user statistics;
+' SINGLE END POINT
+stop
+
+@enduml

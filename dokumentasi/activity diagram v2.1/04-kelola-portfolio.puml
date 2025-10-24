@@ -1,0 +1,140 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC04: Kelola Portfolio**
+
+|Admin|
+start
+:Login ke sistem admin;
+:Akses menu "Kelola Portfolio";
+
+|Sistem|
+:Load halaman portfolio management;
+:Query semua portfolio dari database;
+:Tampilkan daftar portfolio dengan thumbnail;
+
+|Admin|
+:Lihat daftar portfolio existing;
+:Pilih aksi yang diinginkan;
+
+if (Aksi yang dipilih?) then (Create New)
+  :Klik "Tambah Portfolio";
+  
+  |Sistem|
+  :Load form create portfolio;
+  :Tampilkan form kosong;
+  
+  |Admin|
+  :Input title portfolio;
+  :Input description detail;
+  :Pilih kategori project;
+  :Upload gambar utama;
+  :Upload galeri foto;
+  :Set status (draft/published);
+  :Submit form;
+  
+  |Sistem|
+  :Validasi data dan gambar;
+  :Resize dan optimize gambar;
+  :Simpan portfolio ke database;
+  :Upload gambar ke storage;
+  :Generate portfolio slug;
+  
+  |Admin|
+  :Konfirmasi portfolio berhasil dibuat;
+else if (Edit Existing)
+  :Pilih portfolio untuk edit;
+  
+  |Sistem|
+  :Load form edit dengan data existing;
+  :Pre-fill semua field;
+  
+  |Admin|
+  :Update data portfolio;
+  :Ganti gambar (opsional);
+  :Modify description;
+  :Update kategori;
+  :Submit perubahan;
+  
+  |Sistem|
+  :Validasi perubahan;
+  :Update portfolio di database;
+  :Update gambar jika ada perubahan;
+  :Update timestamp modified;
+  
+  |Admin|
+  :Konfirmasi portfolio berhasil diupdate;
+else if (Delete)
+  :Pilih portfolio untuk hapus;
+  :Konfirmasi penghapusan;
+  
+  |Sistem|
+  :Cek apakah portfolio sedang digunakan;
+  :Hapus portfolio dari database;
+  :Hapus file gambar dari storage;
+  :Clean up related data;
+  
+  |Admin|
+  :Konfirmasi portfolio berhasil dihapus;
+else (View Detail)
+  :Klik portfolio untuk preview;
+  
+  |Sistem|
+  :Load detail portfolio;
+  :Tampilkan preview seperti di frontend;
+  
+  |Admin|
+  :Review tampilan portfolio;
+endif
+
+' MERGE POINT - All paths converge here
+|Admin|
+:Selesai kelola portfolio;
+
+|Sistem|
+' SINGLE END POINT
+stop
+
+@enduml

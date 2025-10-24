@@ -1,0 +1,536 @@
+@startuml Activity Diagrams - ARDFYA v2.1
+
+!theme plain
+
+' ========================================
+' 1. Customer Registration Process
+' ========================================
+title Activity Diagram - Customer Registration Process
+
+start
+:User visits registration page;
+:Fill registration form;
+note right
+  - Name
+  - Email
+  - Phone
+  - Password
+  - Confirm Password
+end note
+
+:Submit form;
+:Validate form data;
+
+if (Validation passed?) then (yes)
+  :Check if email exists;
+  if (Email already exists?) then (yes)
+    :Show error message;
+    :Return to form;
+    stop
+  else (no)
+    :Hash password;
+    :Create user record;
+    :Send welcome email;
+    :Auto login user;
+    :Redirect to dashboard;
+    stop
+  endif
+else (no)
+  :Show validation errors;
+  :Return to form;
+  stop
+endif
+
+@enduml
+
+@startuml Activity Diagram - Customer Login Process
+
+title Activity Diagram - Customer Login Process
+
+start
+:User visits login page;
+:Enter credentials;
+note right
+  - Email
+  - Password
+  - Remember me (optional)
+end note
+
+:Submit login form;
+:Validate credentials;
+
+if (Credentials valid?) then (yes)
+  :Check if user is active;
+  if (User active?) then (yes)
+    :Create session;
+    if (Remember me checked?) then (yes)
+      :Set remember token;
+    endif
+    :Redirect to intended page or dashboard;
+    stop
+  else (no)
+    :Show account disabled message;
+    stop
+  endif
+else (no)
+  :Show invalid credentials error;
+  :Return to login form;
+  stop
+endif
+
+@enduml
+
+@startuml Activity Diagram - Inquiry Submission Process
+
+title Activity Diagram - Inquiry Submission Process
+
+start
+:User accesses inquiry form;
+note right
+  Can be Guest or Customer
+end note
+
+if (User logged in?) then (no)
+  :Show login/register option;
+  :User chooses to continue as guest or login;
+  if (Choose to login?) then (yes)
+    :Redirect to login;
+    :After login, return to inquiry;
+  endif
+endif
+
+:Fill inquiry form;
+note right
+  - Service selection
+  - Project title
+  - Description
+  - Budget range
+  - Location
+  - Timeline
+  - Contact info (if guest)
+end note
+
+:Submit inquiry;
+:Validate form data;
+
+if (Validation passed?) then (yes)
+  if (User is guest?) then (yes)
+    :Create temporary user record;
+    :Send registration invitation;
+  endif
+  
+  :Save inquiry to database;
+  :Set status to 'pending';
+  :Send notification to admin;
+  :Send confirmation email to user;
+  :Show success message;
+  :Redirect to inquiry tracking page;
+  stop
+else (no)
+  :Show validation errors;
+  :Return to form;
+  stop
+endif
+
+@enduml
+
+@startuml Activity Diagram - Admin Inquiry Management Process
+
+title Activity Diagram - Admin Inquiry Management Process
+
+start
+:Admin accesses inquiry dashboard;
+:View list of inquiries;
+note right
+  - Filter by status
+  - Filter by priority
+  - Search by customer
+  - Sort by date
+end note
+
+:Select inquiry to review;
+:View inquiry details;
+note right
+  - Customer information
+  - Service requested
+  - Project details
+  - Budget and timeline
+end note
+
+:Admin reviews inquiry;
+
+if (Inquiry acceptable?) then (yes)
+  :Change status to 'approved';
+  :Add admin notes;
+  :Estimate project details;
+  
+  if (Create project immediately?) then (yes)
+    :Create new project;
+    :Link to inquiry;
+    :Set project status to 'planning';
+    :Assign team members;
+    :Set initial timeline;
+    :Change inquiry status to 'converted';
+  else (no)
+    :Save approval notes;
+    :Send approval email to customer;
+  endif
+  
+  :Update inquiry record;
+  :Send notification to customer;
+  stop
+  
+else (no)
+  :Change status to 'rejected';
+  :Add rejection reason;
+  :Send rejection email to customer;
+  :Update inquiry record;
+  stop
+endif
+
+@enduml
+
+@startuml Activity Diagram - Project Creation & Management Process
+
+title Activity Diagram - Project Creation & Management Process
+
+start
+:Admin creates new project;
+note right
+  Can be from inquiry or direct creation
+end note
+
+:Fill project details;
+note right
+  - Project title
+  - Description
+  - Customer assignment
+  - Service type
+  - Budget
+  - Timeline
+  - Location
+  - Team assignment
+end note
+
+:Save project;
+:Set initial status to 'planning';
+:Send notification to customer;
+
+:Project management loop;
+repeat
+  :Admin updates project;
+  note right
+    - Update progress percentage
+    - Change status
+    - Add notes
+    - Upload photos
+    - Update timeline
+    - Modify budget
+  end note
+  
+  :Save updates;
+  :Send update notification to customer;
+  
+  if (Status changed to completed?) then (yes)
+    :Set actual end date;
+    :Generate completion report;
+    :Send completion notification;
+    :Update portfolio if applicable;
+    break
+  endif
+  
+  if (Customer requests changes?) then (yes)
+    :Review change request;
+    :Update project accordingly;
+  endif
+  
+repeat while (Project not completed?)
+
+:Project completed;
+stop
+
+@enduml
+
+@startuml Activity Diagram - Contract Generation & Management Process
+
+title Activity Diagram - Contract Generation & Management Process
+
+start
+:Admin initiates contract creation;
+:Select project for contract;
+:Fill contract details;
+note right
+  - Contract title
+  - Description
+  - Total amount
+  - Payment terms
+  - Start/End dates
+  - Terms & conditions
+end note
+
+:Generate contract number;
+:Save contract as 'draft';
+:Review contract details;
+
+if (Contract ready?) then (yes)
+  :Change status to 'sent';
+  :Generate PDF contract;
+  :Send contract to customer;
+  :Send notification email;
+  
+  :Wait for customer response;
+  
+  if (Customer signs contract?) then (yes)
+    :Update status to 'signed';
+    :Set signed date;
+    :Change status to 'active';
+    :Initialize payment tracking;
+    :Send confirmation to both parties;
+    
+    :Payment management loop;
+    repeat
+      if (Payment received?) then (yes)
+        :Record payment;
+        :Update payment status;
+        :Send payment confirmation;
+        
+        if (Fully paid?) then (yes)
+          :Update payment status to 'paid';
+          :Generate receipt;
+          break
+        endif
+      endif
+      
+      if (Payment overdue?) then (yes)
+        :Update status to 'overdue';
+        :Send reminder email;
+      endif
+      
+    repeat while (Not fully paid?)
+    
+    :Contract completed;
+    stop
+    
+  else (no)
+    :Contract rejected or expired;
+    :Update status to 'cancelled';
+    :Send notification;
+    stop
+  endif
+  
+else (no)
+  :Return to editing;
+  :Make necessary changes;
+  stop
+endif
+
+@enduml
+
+@startuml Activity Diagram - Portfolio Management Process (NEW v2.1)
+
+title Activity Diagram - Portfolio Management Process (NEW v2.1)
+
+start
+:Admin accesses portfolio management;
+:View portfolio list;
+note right
+  - Filter by category
+  - Filter by status
+  - Search by title
+  - Sort by date/ordering
+end note
+
+if (Create new portfolio?) then (yes)
+  :Click create new portfolio;
+  :Fill portfolio form;
+  note right
+    - Title
+    - Description
+    - Category
+    - Client name
+    - Location
+    - Completion date
+    - Project value
+    - Image upload
+    - Featured status
+    - Active status
+    - Ordering
+  end note
+
+  :Validate form data;
+
+  if (Validation passed?) then (yes)
+    if (Image uploaded?) then (yes)
+      :Validate image;
+      :Resize and optimize image;
+      :Store image in storage;
+    endif
+
+    :Save portfolio to database;
+    :Set default ordering if not specified;
+
+    if (Set as featured?) then (yes)
+      :Update homepage display;
+      :Refresh featured portfolio cache;
+    endif
+
+    :Show success message;
+    :Redirect to portfolio list;
+    stop
+
+  else (no)
+    :Show validation errors;
+    :Return to form;
+    stop
+  endif
+
+else (no)
+  :Select existing portfolio to edit;
+  :Load portfolio data;
+  :Update portfolio details;
+
+  if (Changes made?) then (yes)
+    :Validate changes;
+
+    if (Validation passed?) then (yes)
+      :Update database record;
+
+      if (Featured status changed?) then (yes)
+        :Update homepage display;
+        :Refresh cache;
+      endif
+
+      :Show success message;
+      stop
+
+    else (no)
+      :Show validation errors;
+      stop
+    endif
+  endif
+endif
+
+@enduml
+
+@startuml Activity Diagram - Real-time Chat Process
+
+title Activity Diagram - Real-time Chat Process
+
+start
+:User opens chat interface;
+note right
+  Can be Customer or Admin
+end note
+
+:Load chat history;
+:Display existing messages;
+:Mark messages as read;
+
+:Chat session active;
+repeat
+  if (User types message?) then (yes)
+    :Compose message;
+    :Click send button;
+    :Validate message content;
+
+    if (Message valid?) then (yes)
+      :Save message to database;
+      :Broadcast message via Pusher;
+      :Update chat interface;
+      :Send push notification to recipient;
+
+      if (Recipient online?) then (yes)
+        :Show message immediately;
+        :Play notification sound;
+      else (no)
+        :Queue email notification;
+      endif
+
+    else (no)
+      :Show validation error;
+    endif
+  endif
+
+  if (New message received?) then (yes)
+    :Display new message;
+    :Play notification sound;
+    :Update unread count;
+
+    if (Chat window active?) then (yes)
+      :Mark as read automatically;
+    endif
+  endif
+
+  if (User closes chat?) then (yes)
+    :Save chat state;
+    :Disconnect from Pusher;
+    break
+  endif
+
+repeat while (Chat session active?)
+
+:Chat session ended;
+stop
+
+@enduml
+
+@startuml Activity Diagram - Admin Dashboard Analytics Process
+
+title Activity Diagram - Admin Dashboard Analytics Process
+
+start
+:Admin accesses dashboard;
+:Load dashboard data;
+
+fork
+  :Calculate total customers;
+  :Get customer growth rate;
+fork again
+  :Calculate total inquiries;
+  :Get inquiry status breakdown;
+  :Calculate conversion rate;
+fork again
+  :Calculate active projects;
+  :Get project status distribution;
+  :Calculate completion rate;
+fork again
+  :Calculate total revenue;
+  :Get payment status summary;
+  :Calculate monthly revenue;
+fork again
+  :Get recent activities;
+  :Load latest inquiries;
+  :Load project updates;
+end fork
+
+:Compile dashboard data;
+:Generate charts and graphs;
+note right
+  - Customer growth chart
+  - Inquiry status pie chart
+  - Project timeline chart
+  - Revenue trend chart
+  - Recent activities list
+end note
+
+:Display dashboard;
+:Set auto-refresh timer;
+
+repeat
+  :Wait for refresh interval;
+  :Update real-time data;
+  note right
+    - New inquiries count
+    - Active chat notifications
+    - Project status changes
+    - Payment notifications
+  end note
+
+  :Update dashboard widgets;
+
+repeat while (Dashboard active?)
+
+:Dashboard session ended;
+stop
+
+@enduml

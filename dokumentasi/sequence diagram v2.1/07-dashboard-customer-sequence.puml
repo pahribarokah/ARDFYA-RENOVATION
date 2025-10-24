@@ -1,0 +1,75 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling sesuai contoh yang diberikan
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam sequence {
+    ArrowColor black
+    ActorBorderColor black
+    LifeLineBorderColor black
+    ParticipantBorderColor #1976D2
+    ParticipantBackgroundColor #E3F2FD
+    BoxBorderColor black
+}
+
+hide footbox
+
+title **Sequence Diagram - UC07: Dashboard Customer**
+
+participant "Customer" as Customer
+participant "CustomerDashboardPage" as DashboardPage
+participant "CustomerDashboardController" as DashboardCtrl
+participant "User Model" as UserModel
+
+Customer -> DashboardPage: 1: AccessDashboard()
+activate DashboardPage
+
+DashboardPage -> DashboardCtrl: 1.1: index()
+activate DashboardCtrl
+
+DashboardCtrl -> UserModel: 1.1.1: find(customer_id)
+activate UserModel
+
+UserModel --> DashboardCtrl: 1.1.1.1: customerData()
+
+DashboardCtrl -> UserModel: 1.1.1.2: inquiries()
+UserModel --> DashboardCtrl: 1.1.1.2.1: customerInquiries()
+
+DashboardCtrl -> UserModel: 1.1.1.3: projects()
+UserModel --> DashboardCtrl: 1.1.1.3.1: customerProjects()
+
+DashboardCtrl -> UserModel: 1.1.1.4: notifications()
+UserModel --> DashboardCtrl: 1.1.1.4.1: customerNotifications()
+
+alt [Has Active Projects]
+    DashboardCtrl --> DashboardPage: 1.1.1.5: showProjectsOverview()
+    DashboardPage --> Customer: 1.1.1.5.1: displayProjectsSection()
+    
+else [No Active Projects]
+    DashboardCtrl --> DashboardPage: 1.1.1.6: showEmptyProjectsState()
+    DashboardPage --> Customer: 1.1.1.6.1: displayEmptyState()
+end
+
+DashboardCtrl --> DashboardPage: 1.1.2: renderDashboard()
+DashboardPage --> Customer: 1.1.2.1: displayDashboard()
+
+deactivate UserModel
+deactivate DashboardCtrl
+deactivate DashboardPage
+
+@enduml

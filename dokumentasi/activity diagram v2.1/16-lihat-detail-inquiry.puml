@@ -1,0 +1,143 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC16: Lihat Detail Inquiry**
+
+|Admin|
+start
+:Login ke sistem admin;
+:Akses menu "Kelola Inquiry";
+
+|Sistem|
+:Load daftar inquiry;
+:Tampilkan inquiry dengan berbagai status;
+
+|Admin|
+:Pilih inquiry untuk lihat detail;
+:Klik inquiry item;
+
+|Sistem|
+:Load detail inquiry lengkap;
+:Query data customer terkait;
+:Load file attachment (jika ada);
+:Load history perubahan status;
+:Tampilkan detail inquiry;
+
+|Admin|
+:Lihat informasi customer;
+:Review detail kebutuhan project;
+:Lihat budget dan timeline request;
+:Download file attachment (jika ada);
+
+if (Ada file attachment?) then (Ya)
+  :Klik file untuk download/preview;
+  
+  |Sistem|
+  :Stream file untuk download;
+  :atau tampilkan preview (untuk gambar);
+  
+  |Admin|
+  :Review file pendukung;
+  :Analisis kebutuhan berdasarkan file;
+else (Tidak)
+  :Lanjut analisis tanpa file;
+endif
+
+|Admin|
+:Lihat history status inquiry;
+:Review notes dari admin sebelumnya;
+
+if (Ingin ambil action?) then (Ya)
+  if (Action yang dipilih?) then (Process Inquiry)
+    |Sistem|
+    :Redirect ke UC02 (Proses Inquiry);
+    
+    |Admin|
+    :Proses inquiry (approve/reject/pending);
+  else if (Add Notes)
+    :Input internal notes;
+    :Add comment untuk referensi;
+    
+    |Sistem|
+    :Simpan notes ke database;
+    :Update timestamp notes;
+    
+    |Admin|
+    :Konfirmasi notes berhasil disimpan;
+  else (Contact Customer)
+    :Klik "Chat Customer";
+    
+    |Sistem|
+    :Redirect ke UC05 (Chat dengan Customer);
+    :Set context inquiry untuk chat;
+    
+    |Admin|
+    :Mulai chat dengan context inquiry;
+  endif
+else (Tidak)
+  :Selesai review detail;
+endif
+
+if (Ingin lihat inquiry lain?) then (Ya)
+  |Sistem|
+  :Kembali ke daftar inquiry;
+  
+  |Admin|
+  :Pilih inquiry lain untuk review;
+else (Tidak)
+  :Selesai review inquiry;
+endif
+
+' MERGE POINT - All paths converge here
+|Admin|
+:Selesai lihat detail inquiry;
+
+|Sistem|
+:Log inquiry view activity;
+:Update last_viewed timestamp;
+' SINGLE END POINT
+stop
+
+@enduml

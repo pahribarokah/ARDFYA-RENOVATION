@@ -1,0 +1,97 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam minlen 4
+skinparam padding 15
+
+title **Activity Diagram - UC02: Registrasi Akun**
+
+|Guest|
+start
+:Akses halaman registrasi;
+:Isi form registrasi;
+:Input nama lengkap;
+:Input email;
+:Input nomor telepon;
+:Input password;
+:Konfirmasi password;
+
+|Sistem|
+:Validasi format email;
+:Validasi kekuatan password;
+:Cek email sudah terdaftar atau belum;
+
+if (Email sudah terdaftar?) then (Ya)
+  :Tampilkan error "Email sudah terdaftar";
+
+  |Guest|
+  :Ganti email atau login;
+  stop
+else (Tidak)
+  if (Data valid?) then (Ya)
+    |Sistem|
+    :Simpan data user ke database;
+    :Generate user ID;
+    :Kirim email verifikasi;
+    :Tampilkan pesan sukses registrasi;
+
+    |Guest|
+    :Cek email untuk verifikasi;
+    :Klik link verifikasi;
+
+    |Sistem|
+    :Verifikasi akun;
+    :Aktifkan akun user;
+    :Redirect ke halaman login;
+    stop
+  else (Tidak)
+    :Tampilkan error validasi;
+
+    |Guest|
+    :Perbaiki data yang salah;
+    stop
+  endif
+endif
+
+@enduml

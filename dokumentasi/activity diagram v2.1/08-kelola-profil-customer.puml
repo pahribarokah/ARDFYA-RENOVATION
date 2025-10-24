@@ -1,0 +1,137 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC08: Kelola Profil Customer**
+
+|Customer|
+start
+:Login ke sistem customer;
+:Akses menu "Edit Profile";
+
+|Sistem|
+:Load halaman edit profil;
+:Query data customer dari database;
+:Pre-fill form dengan data existing;
+
+|Customer|
+:Lihat data profil saat ini;
+:Pilih data yang ingin diubah;
+
+if (Jenis perubahan?) then (Data Personal)
+  :Update nama lengkap;
+  :Update email;
+  :Update nomor telepon;
+  :Update alamat;
+  :Submit perubahan;
+  
+  |Sistem|
+  :Validasi format email;
+  :Validasi nomor telepon;
+  :Cek email duplikasi;
+  
+  if (Data valid?) then (Ya)
+    :Update data di database;
+    :Log perubahan profil;
+    :Kirim email konfirmasi (jika email berubah);
+    
+    |Customer|
+    :Lihat konfirmasi perubahan berhasil;
+  else (Tidak)
+    :Tampilkan error validasi;
+    
+    |Customer|
+    :Perbaiki data yang salah;
+  endif
+else if (Ganti Password)
+  :Input password lama;
+  :Input password baru;
+  :Konfirmasi password baru;
+  :Submit perubahan password;
+  
+  |Sistem|
+  :Validasi password lama;
+  :Validasi kekuatan password baru;
+  
+  if (Password valid?) then (Ya)
+    :Hash password baru;
+    :Update password di database;
+    :Log perubahan password;
+    :Kirim email notifikasi keamanan;
+    
+    |Customer|
+    :Lihat konfirmasi password berhasil diubah;
+  else (Tidak)
+    :Tampilkan error password;
+    
+    |Customer|
+    :Input ulang password yang benar;
+  endif
+else (Upload Foto Profil)
+  :Pilih foto dari device;
+  :Crop dan resize foto;
+  :Upload foto profil;
+  
+  |Sistem|
+  :Validasi tipe dan ukuran file;
+  :Resize foto ke ukuran standar;
+  :Upload ke storage;
+  :Update URL foto di database;
+  :Hapus foto lama (jika ada);
+  
+  |Customer|
+  :Lihat foto profil baru;
+endif
+
+' MERGE POINT - All paths converge here
+|Customer|
+:Selesai kelola profil;
+
+|Sistem|
+:Update timestamp last_modified;
+:Refresh session data;
+' SINGLE END POINT
+stop
+
+@enduml

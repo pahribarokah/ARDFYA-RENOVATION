@@ -1,0 +1,93 @@
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Brand Colors */
+:root {
+    --brand-green: #16a34a;
+    --brand-green-dark: #15803d;
+}
+
+.text-brand-green {
+    color: var(--brand-green);
+}
+
+.bg-brand-green {
+    background-color: var(--brand-green);
+}
+
+.hover\:bg-brand-green-dark:hover {
+    background-color: var(--brand-green-dark);
+}
+
+/* Chat Button */
+#chat-button {
+    width: 60px;
+    height: 60px;
+    transition: all 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+#chat-button:hover {
+    transform: scale(1.1);
+    animation: none;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(22, 163, 74, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+    }
+}
+
+/* Chat window transition */
+#chat-window {
+    transition: all 0.3s ease;
+}
+
+/* Custom styles */
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-green text-white px-6 py-2 rounded-full hover:bg-brand-green-dark transition duration-300;
+  }
+  
+  .nav-link {
+    @apply relative pb-1 text-gray-700 hover:text-brand-green transition-colors;
+  }
+  
+  .nav-link.active {
+    @apply text-brand-green;
+  }
+  
+  .nav-link::after {
+    content: '';
+    @apply absolute left-0 bottom-0 w-0 h-0.5 bg-brand-green transition-all duration-300;
+  }
+  
+  .nav-link:hover::after, .nav-link.active::after {
+    @apply w-full;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-lg transition-all duration-300;
+  }
+  
+  .card:hover {
+    @apply transform -translate-y-1 shadow-xl;
+  }
+}

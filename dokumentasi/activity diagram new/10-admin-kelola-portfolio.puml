@@ -1,0 +1,108 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+' Pengaturan untuk layout yang sangat rapi
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam minlen 4
+skinparam padding 15
+
+title **Activity Diagram - UC21: Kelola Portfolio**
+
+|Admin|
+start
+:Akses menu kelola portfolio;
+
+|Sistem|
+:Load halaman portfolio management;
+:Query semua portfolio dari database;
+:Tampilkan daftar portfolio dengan pagination;
+
+|Admin|
+:Lihat daftar portfolio existing;
+
+if (Aksi yang dipilih?) then (Create New)
+  :Klik "Tambah Portfolio";
+
+  |Sistem|
+  :Load form create portfolio;
+
+  |Admin|
+  :Isi form portfolio baru;
+  :Input title, description, category;
+  :Upload gambar portfolio;
+  :Set featured status;
+  :Submit form;
+
+  |Sistem|
+  :Validasi data dan gambar;
+  :Simpan portfolio ke database;
+  :Upload gambar ke storage;
+  :Redirect ke daftar portfolio;
+  stop
+else if (Edit Existing)
+  :Pilih portfolio untuk edit;
+
+  |Sistem|
+  :Load form edit dengan data existing;
+
+  |Admin|
+  :Update data portfolio;
+  :Ganti gambar (opsional);
+  :Submit perubahan;
+
+  |Sistem|
+  :Update portfolio di database;
+  :Update gambar jika ada;
+  :Redirect ke daftar portfolio;
+  stop
+else if (Delete)
+  :Pilih portfolio untuk hapus;
+  :Konfirmasi penghapusan;
+
+  |Sistem|
+  :Hapus portfolio dari database;
+  :Hapus file gambar dari storage;
+  :Update tampilan daftar;
+  stop
+else (View Only)
+  :Lihat detail portfolio;
+
+  |Sistem|
+  :Tampilkan detail portfolio;
+  stop
+endif
+
+@enduml

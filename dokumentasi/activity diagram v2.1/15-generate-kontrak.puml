@@ -1,0 +1,132 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC15: Generate Kontrak**
+
+|Admin|
+start
+:Login ke sistem admin;
+:Akses menu "Generate Kontrak";
+
+|Sistem|
+:Load halaman contract management;
+:Query project yang belum ada contractnya;
+:Tampilkan daftar project eligible;
+
+|Admin|
+:Pilih project untuk generate contract;
+
+|Sistem|
+:Load data project dan customer;
+:Pre-fill form contract dengan data project;
+:Generate contract number otomatis;
+
+|Admin|
+:Review data project;
+:Input nilai contract (amount);
+:Set contract start_date dan end_date;
+:Input syarat dan ketentuan;
+:Add payment terms;
+:Add project specifications;
+
+if (Ingin preview dulu?) then (Ya)
+  :Klik "Preview Contract";
+  
+  |Sistem|
+  :Generate preview PDF menggunakan template;
+  :Tampilkan preview contract di browser;
+  
+  |Admin|
+  :Review preview contract;
+  :Cek format dan content;
+  
+  if (Contract sudah benar?) then (Ya)
+    :Klik "Generate Final Contract";
+  else (Tidak)
+    :Klik "Edit Contract";
+    
+    |Sistem|
+    :Kembali ke form edit;
+    
+    |Admin|
+    :Modify contract details;
+  endif
+else (Tidak)
+  :Langsung generate final contract;
+endif
+
+|Sistem|
+:Validasi semua data contract;
+:Generate final PDF contract;
+:Simpan contract ke database;
+:Link contract dengan project (One-to-One);
+:Upload PDF ke storage;
+:Update project contract status;
+:Kirim notifikasi ke customer;
+
+|Admin|
+:Lihat konfirmasi contract berhasil di-generate;
+:Customer mendapat akses UC12 (Download Kontrak);
+
+if (Ingin generate contract lain?) then (Ya)
+  :Pilih project lain;
+  
+  |Sistem|
+  :Load project baru untuk contract;
+else (Tidak)
+  :Selesai generate contract;
+endif
+
+' MERGE POINT - All paths converge here
+|Admin|
+:Selesai proses generate kontrak;
+
+|Sistem|
+:Update contract statistics;
+:Log contract generation activity;
+' SINGLE END POINT
+stop
+
+@enduml

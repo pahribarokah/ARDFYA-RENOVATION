@@ -1,0 +1,149 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling UML BPMN yang tegas dan standar
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC14: Kelola Project**
+
+|Admin|
+start
+:Login ke sistem admin;
+:Akses menu "Kelola Project";
+
+|Sistem|
+:Load halaman project management;
+:Query semua project dari database;
+:Load status dan progress setiap project;
+:Tampilkan daftar project dengan filter;
+
+|Admin|
+:Lihat daftar project;
+:Filter berdasarkan status (opsional);
+
+if (Aksi yang dipilih?) then (Create New Project)
+  :Klik "Create Project";
+  :Pilih customer dari dropdown;
+  :Pilih inquiry yang akan dikonversi;
+  
+  |Sistem|
+  :Load data customer dan inquiry;
+  :Pre-fill form project;
+  
+  |Admin|
+  :Input detail project;
+  :Set project name;
+  :Set start date dan estimated end date;
+  :Set budget amount;
+  :Input project description;
+  :Submit form project;
+  
+  |Sistem|
+  :Generate project ID;
+  :Simpan project ke database;
+  :Update inquiry status = 'converted';
+  :Trigger UC15 (Generate Kontrak);
+  :Kirim notifikasi ke customer;
+  
+  |Admin|
+  :Konfirmasi project berhasil dibuat;
+else if (Update Existing Project)
+  :Pilih project untuk update;
+  
+  |Sistem|
+  :Load detail project;
+  :Tampilkan form update;
+  
+  |Admin|
+  :Update progress percentage;
+  :Upload foto progress;
+  :Update project notes;
+  :Update timeline jika perlu;
+  :Submit update;
+  
+  |Sistem|
+  :Update project data;
+  :Save progress photos;
+  :Update customer_last_viewed = null;
+  :Kirim notifikasi progress ke customer;
+  
+  |Admin|
+  :Konfirmasi project berhasil diupdate;
+else if (Complete Project)
+  :Pilih project untuk complete;
+  :Set status = 'completed';
+  :Set actual end date;
+  :Upload final photos;
+  :Add completion notes;
+  
+  |Sistem|
+  :Update project status;
+  :Generate final invoice (opsional);
+  :Add project to portfolio (opsional);
+  :Kirim notifikasi completion;
+  
+  |Admin|
+  :Konfirmasi project completed;
+else (View Project Detail)
+  :Pilih project untuk view;
+  
+  |Sistem|
+  :Load detail lengkap project;
+  :Tampilkan timeline dan progress;
+  :Tampilkan customer information;
+  :Tampilkan contract status;
+  
+  |Admin|
+  :Review detail project;
+  :Monitor project progress;
+endif
+
+' MERGE POINT - All paths converge here
+|Admin|
+:Selesai kelola project;
+
+|Sistem|
+:Update admin activity log;
+' SINGLE END POINT
+stop
+
+@enduml

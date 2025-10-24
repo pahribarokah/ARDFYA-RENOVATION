@@ -1,0 +1,106 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 20
+skinparam ranksep 30
+
+title **Activity Diagram - UC03: Ajukan Inquiry**
+
+|Guest|
+start
+:Akses halaman registrasi/login;
+
+if (Sudah punya akun?) then (Tidak)
+  :Klik "Daftar Akun";
+  :Isi form registrasi;
+  :Input nama, email, password, phone;
+  :Submit form registrasi;
+
+  |Sistem|
+  :Validasi data registrasi;
+  if (Data valid?) then (Ya)
+    :Simpan data customer ke database;
+    :Kirim email verifikasi;
+    :Buat session customer;
+    :Redirect ke UC8 (Dashboard Customer);
+
+    |Customer|
+    :Akses dashboard customer;
+
+    |Sistem|
+    stop
+  else (Tidak)
+    :Tampilkan pesan error;
+
+    |Guest|
+    :Perbaiki data registrasi;
+
+    |Sistem|
+    stop
+  endif
+else (Ya)
+  :Input email dan password;
+  :Klik tombol login;
+
+  |Sistem|
+  :Validasi kredensial;
+  if (Kredensial valid?) then (Ya)
+    :Buat session customer;
+    :Redirect ke UC8 (Dashboard Customer);
+
+    |Customer|
+    :Akses dashboard customer;
+
+    |Sistem|
+    stop
+  else (Tidak)
+    :Tampilkan pesan error;
+
+    |Guest|
+    :Kembali ke halaman login;
+
+    |Sistem|
+    stop
+  endif
+endif
+
+@enduml

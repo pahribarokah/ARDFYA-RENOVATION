@@ -1,0 +1,113 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam minlen 4
+skinparam padding 15
+
+title **Activity Diagram - UC18: Proses Inquiry (include UC19: Kelola Project)**
+
+|Admin|
+start
+:Akses menu proses inquiry;
+
+|Sistem|
+:Load daftar inquiry;
+:Query inquiry dengan status 'new', 'contacted';
+:Tampilkan daftar inquiry dengan filter status;
+
+|Admin|
+:Lihat daftar inquiry customer;
+:Filter berdasarkan status (opsional);
+:Pilih inquiry yang akan diproses;
+
+|Sistem|
+:Load detail inquiry lengkap;
+:Tampilkan data customer dan service;
+:Tampilkan detail kebutuhan project;
+
+|Admin|
+:Review detail inquiry;
+:Baca deskripsi kebutuhan;
+:Cek budget dan timeline customer;
+
+if (Keputusan admin?) then (Approve & Convert to Project)
+  :Klik "Convert to Project";
+  :Input detail project;
+  :Set project timeline dan budget;
+
+  |Sistem|
+  :Create project baru (UC19);
+  :Link project dengan inquiry;
+  :Update inquiry status = 'completed';
+  :Kirim notifikasi ke customer;
+  :Redirect ke UC19 (Kelola Project);
+  stop
+else if (Need More Info)
+  :Update status = 'contacted';
+  :Add admin notes;
+  :Request additional information;
+
+  |Sistem|
+  :Update inquiry dengan notes;
+  :Kirim notifikasi ke customer;
+  :Kirim email follow-up;
+  stop
+else if (Reject)
+  :Update status = 'cancelled';
+  :Input alasan penolakan;
+
+  |Sistem|
+  :Update inquiry status;
+  :Kirim notifikasi penolakan ke customer;
+  stop
+else (Hold/Review Later)
+  :Update status = 'in_progress';
+  :Add internal notes;
+
+  |Sistem|
+  :Update inquiry untuk review nanti;
+  stop
+endif
+
+@enduml

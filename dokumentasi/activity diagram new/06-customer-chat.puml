@@ -1,0 +1,108 @@
+@startuml
+
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam handwritten false
+
+' Styling untuk swimlane yang rapi
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 10
+}
+
+skinparam activityStart {
+    Color black
+}
+
+skinparam activityEnd {
+    Color black
+}
+
+skinparam arrow {
+    Color black
+    Thickness 2
+}
+
+skinparam swimlane {
+    BorderColor black
+    BorderThickness 2
+    TitleBackgroundColor #F5F5F5
+}
+
+skinparam linetype ortho
+
+title **Activity Diagram - UC15: Chat dengan Admin**
+
+|Customer|
+start
+:Akses menu chat dengan admin;
+
+|Sistem|
+:Load interface chat;
+:Query riwayat chat customer;
+:Tampilkan chat history;
+:Setup real-time connection (Laravel Echo);
+
+|Customer|
+:Lihat riwayat chat dengan admin;
+:Ketik pesan baru;
+
+if (Ingin kirim file?) then (Ya)
+  :Pilih file attachment;
+  :Upload file;
+
+  |Sistem|
+  :Validasi file type dan size;
+  :Simpan file ke storage;
+else (Tidak)
+endif
+
+:Kirim pesan;
+
+|Sistem|
+:Simpan pesan ke database (chats table);
+:Broadcast pesan via Pusher;
+:Kirim notifikasi ke admin;
+:Update chat interface real-time;
+
+|Customer|
+:Lihat pesan terkirim;
+:Menunggu balasan admin;
+
+note right
+  Real-time communication
+  menggunakan Laravel Echo
+  dan Pusher service
+end note
+
+if (Admin membalas?) then (Ya)
+  |Sistem|
+  :Terima pesan dari admin (UC22);
+  :Broadcast balasan ke customer;
+  :Update chat interface;
+
+  |Customer|
+  :Baca balasan admin;
+  :Lanjut percakapan atau selesai;
+
+  |Sistem|
+  stop
+else (Tidak)
+  |Customer|
+  :Keluar dari chat;
+
+  |Sistem|
+  stop
+endif
+
+@enduml
